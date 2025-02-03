@@ -8,15 +8,15 @@ export default function Auth() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
-      <div className="bg-zinc-800 p-8 rounded-xl border border-zinc-700 max-w-md w-full mx-4">
+    <div className="fixed inset-0 bg-zinc-950 flex items-center justify-center">
+      <div className="bg-zinc-900 p-8 rounded-xl border border-zinc-700 max-w-md w-full mx-4">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-zinc-100 mb-2">Welcome to Cloud Storage</h1>
-          <p className="text-zinc-400">Sign in with Google to continue</p>
+          <h1 className="text-2xl font-bold text-zinc-100 mb-2">Welcome to Mini Drive</h1>
+          <p className="text-zinc-400">Your personal cloud storage</p>
         </div>
         
         <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
-          <div className="flex justify-center">
+          <div className="flex justify-center items-center">
             <GoogleLogin
               onSuccess={async (credentialResponse) => {
                 await loginWithGoogle(credentialResponse.credential);
