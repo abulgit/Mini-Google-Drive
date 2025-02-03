@@ -1,7 +1,7 @@
 // files.ts
 import { Router } from 'express';
 import { authenticate } from '../middlewares/auth';
-import { getAuthParams, saveFile, getFiles, deleteFile, getStorageStats} from '../controllers/files';
+import { getAuthParams ,saveFile, getFiles, deleteFile, getStorageStats} from '../controllers/files';
 
 const router = Router();
 //@ts-ignore

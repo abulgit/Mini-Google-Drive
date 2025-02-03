@@ -14,11 +14,10 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem('token'));
 
-  const login = useCallback(async (email, password) => {
+  const loginWithGoogle = useCallback(async (googleToken) => {
     try {
-      const { data } = await axios.post('http://localhost:3000/api/auth/login', {
-        email,
-        password,
+      const { data } = await axios.post('http://localhost:3000/api/auth/google', {
+        token: googleToken
       });
       
       const { token: newToken } = data;
@@ -28,7 +27,7 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.message || 'Login failed'
+        error: error.response?.data?.message || 'Google login failed'
       };
     }
   }, []);
@@ -40,7 +39,7 @@ export const AuthProvider = ({ children }) => {
 
   const value = {
     token,
-    login,
+    loginWithGoogle,
     logout,
     isAuthenticated: !!token
   };

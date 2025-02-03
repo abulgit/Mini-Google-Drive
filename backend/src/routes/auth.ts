@@ -1,11 +1,12 @@
 // auth.ts
 import { Router } from 'express';
-import { register, login } from '../controllers/auth';
+import { googleLogin } from '../controllers/auth';
 
 const router = Router();
-//@ts-ignore
-router.post('/register', register);
-//@ts-ignore
-router.post('/login', login);
+// //@ts-ignore
+// router.post('/register', register);
+// //@ts-ignore
+// router.post('/login', login);
+router.post('/google', googleLogin);
 
 export default router;
