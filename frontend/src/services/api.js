@@ -1,8 +1,9 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:3000/api';
-const IMAGEKIT_UPLOAD_URL = 'https://upload.imagekit.io/api/v1/files/upload';
-const IMAGEKIT_PUBLIC_KEY = 'public_+HO4LWdAtp1QybCZa8KgfOJZfxE=';
+// Updated to use Vite's environment variables
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const IMAGEKIT_UPLOAD_URL = import.meta.env.VITE_IMAGEKIT_UPLOAD_URL;
+const IMAGEKIT_PUBLIC_KEY = import.meta.env.VITE_IMAGEKIT_PUBLIC_KEY;
 
 const api = axios.create({
   baseURL: API_BASE_URL,

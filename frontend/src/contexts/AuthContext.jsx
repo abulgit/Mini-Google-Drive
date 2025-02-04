@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useCallback } from 'react';
 import axios from 'axios';
 
 const AuthContext = createContext(null);
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -16,7 +17,7 @@ export const AuthProvider = ({ children }) => {
 
   const loginWithGoogle = useCallback(async (googleToken) => {
     try {
-      const { data } = await axios.post('http://localhost:3000/api/auth/google', {
+      const { data } = await axios.post(`${API_BASE_URL}/auth/google`, {
         token: googleToken
       });
       
