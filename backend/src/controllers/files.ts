@@ -3,11 +3,13 @@ import { Request, Response } from 'express';
 import ImageKit from 'imagekit';
 import File from '../models/File';
 import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const imagekit = new ImageKit({
-  publicKey: 'public_+HO4LWdAtp1QybCZa8KgfOJZfxE='!,
-  privateKey: 'private_J0q8hmXxBLlvpt1UPeN0wexrwbY='!,
-  urlEndpoint: 'https://ik.imagekit.io/d1yzyvnz14'!,
+  publicKey: process.env.IMAGEKIT_PUBLIC_KEY!,
+  privateKey: process.env.IMAGEKIT_PRIVATE_KEY!,
+  urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT!,
 });
 
 
