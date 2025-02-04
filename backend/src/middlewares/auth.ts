@@ -1,12 +1,18 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import { IUser } from '../models/User';
 
 interface JwtPayload {
   userId: string;
 }
 
+export interface AuthRequest extends Request {
+  userId?: string;
+  user?: IUser;
+}
+
 export const authenticate = async (
-  req: Request,
+  req: AuthRequest,
   res: Response,
   next: NextFunction
 ) => {
@@ -17,11 +23,18 @@ export const authenticate = async (
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
-    //@ts-ignore
+    if (!process.env.JWT_SECRET) {
+      throw new Error('JWT_SECRET is not defined');
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET) as JwtPayload;
     req.userId = decoded.userId;
     next();
   } catch (error) {
-    res.status(401).json({ message: 'Invalid token' });
+    if (error instanceof Error) {
+      res.status(401).json({ message: error.message });
+    } else {
+      res.status(401).json({ message: 'Invalid token' });
+    }
   }
 };

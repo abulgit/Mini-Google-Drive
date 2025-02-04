@@ -4,6 +4,8 @@ import ImageKit from 'imagekit';
 import File from '../models/File';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import { IUser } from '../models/User';
+import { AuthRequest } from '../middlewares/auth';
 dotenv.config();
 
 const imagekit = new ImageKit({
@@ -12,28 +14,66 @@ const imagekit = new ImageKit({
   urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT!,
 });
 
+interface FileUploadRequest extends Request {
+  user?: IUser;
+  userId?: string;
+}
 
-export const getAuthParams = (req: Request, res: Response) => {
+interface FileResponse {
+  filename: string;
+  actualFilename: string;
+  fileId: string;
+  url: string;
+  size: number;
+  createdAt: Date;
+}
+
+interface IFile {
+  filename: string;
+  actualFilename: string;
+  fileId: string;
+  url: string;
+  size: number;
+  user: mongoose.Types.ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface FileRequestBody {
+  actualFilename: string;
+  fileId: string;
+  url: string;
+  size: string | number;
+  filename: string;
+}
+
+export const getAuthParams = (req: AuthRequest, res: Response) => {
   try {
     const authParams = imagekit.getAuthenticationParameters();
     res.json(authParams);
   } catch (error) {
-    res.status(500).json({ message: 'Error generating auth parameters' });
+    if (error instanceof Error) {
+      res.status(500).json({ message: error.message });
+    } else {
+      res.status(500).json({ message: 'Error generating auth parameters' });
+    }
   }
 };
 
-export const saveFile = async (req: Request, res: Response) => {
+export const saveFile = async (req: AuthRequest & { body: FileRequestBody }, res: Response) => {
   try {
     const { actualFilename, fileId, url, size, filename } = req.body;
     
+    if (!req.userId) {
+      return res.status(401).json({ message: 'User not authenticated' });
+    }
+
+    const userObjectId = new mongoose.Types.ObjectId(req.userId);
+
     // Validate actual filename
     if (!actualFilename || typeof actualFilename !== 'string' || actualFilename.trim().length === 0) {
       return res.status(400).json({ message: 'Invalid filename' });
     }
-
-    // @ts-ignore
-    const userId = req.userId;
-    const userObjectId = new mongoose.Types.ObjectId(userId);
 
     // Convert size to number and validate
     const fileSize = Number(size);
@@ -67,7 +107,7 @@ export const saveFile = async (req: Request, res: Response) => {
       fileId,
       url,
       size: fileSize,
-      user: userId,
+      user: req.userId,
     });
 
     await newFile.save();
@@ -81,29 +121,43 @@ export const saveFile = async (req: Request, res: Response) => {
     });
 
   } catch (error) {
-    res.status(500).json({ message: 'Error saving file' });
+    if (error instanceof Error) {
+      res.status(500).json({ message: error.message });
+    } else {
+      res.status(500).json({ message: 'An unknown error occurred' });
+    }
   }
 };
 
-export const getFiles = async (req: Request, res: Response) => {
+export const getFiles = async (req: FileUploadRequest, res: Response) => {
   try {
-    // @ts-ignore
+    if (!req.userId) {
+      return res.status(401).json({ message: 'User not authenticated' });
+    }
+
     const files = await File.find({ user: req.userId })
       .select('filename actualFilename fileId url size createdAt');
     res.json(files);
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching files' });
+    if (error instanceof Error) {
+      res.status(500).json({ message: error.message });
+    } else {
+      res.status(500).json({ message: 'An unknown error occurred' });
+    }
   }
 };
 
-export const deleteFile = async (req: Request, res: Response) => {
+export const deleteFile = async (req: AuthRequest & { params: { id: string } }, res: Response) => {
   try {
     const { id } = req.params;
+
+    if (!req.userId) {
+      return res.status(401).json({ message: 'User not authenticated' });
+    }
 
     // Check if file exists and belongs to the current user
     const file = await File.findOne({ 
       _id: id,
-      // @ts-ignore
       user: req.userId 
     });
 
@@ -135,31 +189,41 @@ export const deleteFile = async (req: Request, res: Response) => {
     });
 
   } catch (error) {
-    console.error('Error deleting file:', error);
-    res.status(500).json({ 
-      message: 'Failed to delete file', 
-      //@ts-ignore
-      error: error.message 
-    });
+    if (error instanceof Error) {
+      res.status(500).json({ message: error.message });
+    } else {
+      res.status(500).json({ message: 'An unknown error occurred' });
+    }
   }
 };
 
-export const getStorageStats = async (req: Request, res: Response) => {
-  try {
-    // @ts-ignore
-    const userId = req.userId;
-    
-    // Convert string ID to ObjectId
-    const userObjectId = new mongoose.Types.ObjectId(userId);
+// Add proper type for storage stats
+interface StorageStats {
+  storageLimit: number;
+  totalUsed: number;
+  remainingSpace: number;
+  percentageUsed: string;
+  fileCount: number;
+  recentFiles: Array<{
+    actualFilename: string;
+    size: number;
+  }>;
+}
 
-    // Update aggregation pipeline
+export const getStorageStats = async (req: FileUploadRequest, res: Response) => {
+  try {
+    if (!req.userId) {
+      return res.status(401).json({ message: 'User not authenticated' });
+    }
+    
+    const userObjectId = new mongoose.Types.ObjectId(req.userId);
+
     const result = await File.aggregate([
       { 
-        $match: { 
-          user: userObjectId // Use ObjectId here
-        } 
+        $match: { user: userObjectId }
       },
-      { $group: { 
+      { 
+        $group: { 
           _id: null, 
           totalUsed: { $sum: "$size" },
           fileCount: { $sum: 1 }
@@ -171,13 +235,12 @@ export const getStorageStats = async (req: Request, res: Response) => {
     const totalUsed = result[0]?.totalUsed || 0;
     const percentageUsed = (totalUsed / storageLimit * 100).toFixed(2);
 
-    // Get sample of recent filenames
     const recentFiles = await File.find({ user: userObjectId })
       .sort({ createdAt: -1 })
       .limit(5)
       .select('actualFilename size');
 
-    res.json({
+    const stats: StorageStats = {
       storageLimit,
       totalUsed,
       remainingSpace: storageLimit - totalUsed,
@@ -187,15 +250,15 @@ export const getStorageStats = async (req: Request, res: Response) => {
         actualFilename: file.actualFilename,
         size: file.size
       }))
-    });
+    };
 
+    res.json(stats);
   } catch (error) {
-    console.error('Error getting storage stats:', error);
-    res.status(500).json({ 
-      message: 'Error getting storage stats',
-      // @ts-ignore
-      error: error.message 
-    });
+    if (error instanceof Error) {
+      res.status(500).json({ message: error.message });
+    } else {
+      res.status(500).json({ message: 'An unknown error occurred' });
+    }
   }
 };
 
