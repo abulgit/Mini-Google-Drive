@@ -1,5 +1,5 @@
 import React from 'react';
-import { FiHardDrive, FiFile, FiCloud } from 'react-icons/fi'; // Make sure to install react-icons
+import { FiHardDrive, FiFile, FiCloud } from 'react-icons/fi';
 
 export const StorageOverview = ({ storageStats }) => {
   if (!storageStats) {
