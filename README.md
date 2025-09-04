@@ -1,42 +1,36 @@
-# MiniDrive - Your Personal Cloud Locker
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-Hey! This is MiniDrive, a personal cloud storage solution I built to learn modern full-stack development. It's like having your own private Google Drive, but simpler and more focused.
+## Getting Started
 
-## Quick Start 🚀
-Visit this
- - https://minidriveapp.vercel.app/
+First, run the development server:
 
-## What's in the Box 
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
 
-- **Google Login**: Just sign in with your Google account
-- **Real Storage Stats**: See exactly how much space you're using
-- **Drag & Drop Uploads**: Upload files as easily as dragging them into the window
-- **100MB Free**: 100MB Storage Free
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-### Why I Built This
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-I wanted to understand:
-- File uploads
-- Third-party auth integration
-- Storage management
-- React 
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-### Prerequisites for Local
-- Node.js 18+
-- MongoDB (local or Atlas)
-- Google OAuth credentials
-- ImageKit account (for file storage)
+## Learn More
 
-## Cool Tech Inside 
+To learn more about Next.js, take a look at the following resources:
 
-**Frontend**
-- React 18 + Vite = Fast
-- Tailwind CSS =  Pretty
-- React Router =  Navigation
-- Context API = 🔐 Auth management
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-**Backend**  
-- Node.js/Express =  API engine
-- MongoDB =  Data storage
-- ImageKit =  File handling
-- JWT = 🔑 Authentication
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
