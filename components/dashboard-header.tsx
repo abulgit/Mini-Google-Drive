@@ -2,12 +2,13 @@
 
 import { signOut, useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
 export function DashboardHeader() {
   const { data: session } = useSession();
 
   const handleSignOut = () => {
-    signOut({ callbackUrl: "/login" });
+    signOut({ callbackUrl: "/" });
   };
 
   return (
@@ -31,9 +32,11 @@ export function DashboardHeader() {
                   </div>
                 </div>
                 {session.user.image && (
-                  <img
+                  <Image
                     src={session.user.image}
                     alt="Profile"
+                    width={32}
+                    height={32}
                     className="w-8 h-8 rounded-full"
                   />
                 )}
