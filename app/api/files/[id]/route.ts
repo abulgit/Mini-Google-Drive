@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/mongodb";
 import { deleteFileFromBlob } from "@/lib/azure-storage";
+import { validateCSRFToken, createCSRFError } from "@/lib/csrf-middleware";
 import { ObjectId } from "mongodb";
 import type { FileDocument, User } from "@/types";
 
@@ -11,6 +12,11 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Validate CSRF token first
+    if (!validateCSRFToken(request)) {
+      return createCSRFError();
+    }
+
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.id) {

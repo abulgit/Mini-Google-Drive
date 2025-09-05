@@ -11,6 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useCSRFToken } from "@/hooks/useCSRFToken";
 import type { FileDocument } from "@/types";
 
 interface FileListProps {
@@ -20,6 +21,7 @@ interface FileListProps {
 
 export function FileList({ files, onFileDeleted }: FileListProps) {
   const [deletingFiles, setDeletingFiles] = useState<Set<string>>(new Set());
+  const { csrfToken } = useCSRFToken();
 
   const formatBytes = (bytes: number) => {
     if (bytes === 0) {
@@ -82,11 +84,19 @@ export function FileList({ files, onFileDeleted }: FileListProps) {
       return;
     }
 
+    if (!csrfToken) {
+      console.error("CSRF token not available");
+      return;
+    }
+
     setDeletingFiles(prev => new Set(prev).add(fileId));
 
     try {
       const response = await fetch(`/api/files/${fileId}`, {
         method: "DELETE",
+        headers: {
+          "X-CSRF-Token": csrfToken,
+        },
       });
 
       if (response.ok) {

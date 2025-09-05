@@ -3,10 +3,16 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/mongodb";
 import { uploadFileToBlob } from "@/lib/azure-storage";
+import { validateCSRFToken, createCSRFError } from "@/lib/csrf-middleware";
 import { STORAGE_LIMIT, type FileDocument, type User } from "@/types";
 
 export async function POST(request: NextRequest) {
   try {
+    // Validate CSRF token first
+    if (!validateCSRFToken(request)) {
+      return createCSRFError();
+    }
+
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.id) {
