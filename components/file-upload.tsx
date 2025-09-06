@@ -3,10 +3,11 @@
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 import { STORAGE_LIMIT } from "@/types";
 import { useCSRFToken } from "@/hooks/useCSRFToken";
 import { cn } from "@/lib/utils";
-import { Upload, X, CheckCircle, AlertCircle, Cloud, Plus } from "lucide-react";
+import { Upload, Cloud, Plus } from "lucide-react";
 
 interface FileUploadProps {
   onUploadSuccess: () => void;
@@ -16,7 +17,6 @@ interface FileUploadProps {
 export function FileUpload({ onUploadSuccess, className }: FileUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { csrfToken, loading: csrfLoading } = useCSRFToken();
@@ -52,7 +52,7 @@ export function FileUpload({ onUploadSuccess, className }: FileUploadProps) {
     if (file) {
       const validationError = validateFile(file);
       if (validationError) {
-        setError(validationError);
+        toast.error(validationError);
         return;
       }
       uploadFile(file);
@@ -61,12 +61,11 @@ export function FileUpload({ onUploadSuccess, className }: FileUploadProps) {
 
   const uploadFile = async (file: File) => {
     if (!csrfToken) {
-      setError("Security token not available. Please refresh the page.");
+      toast.error("Security token not available. Please refresh the page.");
       return;
     }
 
     setUploading(true);
-    setError(null);
     setUploadProgress(0);
 
     try {
@@ -95,13 +94,14 @@ export function FileUpload({ onUploadSuccess, className }: FileUploadProps) {
         throw new Error(data.error || "Upload failed");
       }
 
+      toast.success("File uploaded successfully!");
       // Show success state briefly
       setTimeout(() => {
         onUploadSuccess();
         setUploadProgress(0);
       }, 1000);
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Upload failed");
+      toast.error(error instanceof Error ? error.message : "Upload failed");
       setUploadProgress(0);
     } finally {
       setTimeout(() => {
@@ -239,28 +239,6 @@ export function FileUpload({ onUploadSuccess, className }: FileUploadProps) {
             </div>
           )}
         </div>
-
-        {/* Error Display */}
-        {error && (
-          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-sm text-red-700">
-            <AlertCircle className="w-4 h-4 flex-shrink-0" />
-            <span>{error}</span>
-            <button
-              onClick={() => setError(null)}
-              className="ml-auto text-red-500 hover:text-red-700"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-        )}
-
-        {/* Success State */}
-        {uploading && uploadProgress === 100 && (
-          <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2 text-sm text-green-700">
-            <CheckCircle className="w-4 h-4" />
-            <span>File uploaded successfully!</span>
-          </div>
-        )}
       </div>
     </div>
   );

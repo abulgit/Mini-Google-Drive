@@ -11,11 +11,20 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { toast } from "sonner";
 import { useCSRFToken } from "@/hooks/useCSRFToken";
 import type { FileDocument } from "@/types";
 import {
@@ -41,6 +50,8 @@ interface FileGridProps {
 
 export function FileGrid({ files, viewMode, onFileDeleted }: FileGridProps) {
   const [deletingFiles, setDeletingFiles] = useState<Set<string>>(new Set());
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [fileToDelete, setFileToDelete] = useState<FileDocument | null>(null);
   const { csrfToken } = useCSRFToken();
 
   const formatBytes = (bytes: number) => {
@@ -109,20 +120,30 @@ export function FileGrid({ files, viewMode, onFileDeleted }: FileGridProps) {
       if (response.ok) {
         const data = await response.json();
         window.open(data.downloadUrl, "_blank");
+      } else {
+        toast.error("Failed to download file");
       }
     } catch (error) {
       console.error("Download failed:", error);
+      toast.error("Failed to download file");
     }
   };
 
   const handleDelete = async (fileId: string) => {
-    if (!confirm("Are you sure you want to delete this file?")) {
-      return;
+    const file = files.find(f => f._id!.toString() === fileId);
+    if (file) {
+      setFileToDelete(file);
+      setDeleteDialogOpen(true);
     }
-    if (!csrfToken) {
+  };
+
+  const confirmDelete = async () => {
+    if (!fileToDelete || !csrfToken) {
       return;
     }
 
+    const fileId = fileToDelete._id!.toString();
+    setDeleteDialogOpen(false);
     setDeletingFiles(prev => new Set(prev).add(fileId));
 
     try {
@@ -132,16 +153,21 @@ export function FileGrid({ files, viewMode, onFileDeleted }: FileGridProps) {
       });
 
       if (response.ok) {
+        toast.success("File deleted successfully");
         onFileDeleted();
+      } else {
+        toast.error("Failed to delete file");
       }
     } catch (error) {
       console.error("Delete failed:", error);
+      toast.error("Failed to delete file");
     } finally {
       setDeletingFiles(prev => {
         const newSet = new Set(prev);
         newSet.delete(fileId);
         return newSet;
       });
+      setFileToDelete(null);
     }
   };
 
@@ -244,6 +270,39 @@ export function FileGrid({ files, viewMode, onFileDeleted }: FileGridProps) {
             })}
           </div>
         </div>
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Delete File</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete &quot;
+                {fileToDelete?.originalFileName}&quot;? This action cannot be
+                undone.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setDeleteDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={confirmDelete}
+                disabled={deletingFiles.has(
+                  fileToDelete?._id?.toString() || ""
+                )}
+              >
+                {deletingFiles.has(fileToDelete?._id?.toString() || "")
+                  ? "Deleting..."
+                  : "Delete"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </TooltipProvider>
     );
   }
@@ -339,6 +398,37 @@ export function FileGrid({ files, viewMode, onFileDeleted }: FileGridProps) {
           })}
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete File</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete &quot;
+              {fileToDelete?.originalFileName}&quot;? This action cannot be
+              undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmDelete}
+              disabled={deletingFiles.has(fileToDelete?._id?.toString() || "")}
+            >
+              {deletingFiles.has(fileToDelete?._id?.toString() || "")
+                ? "Deleting..."
+                : "Delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </TooltipProvider>
   );
 }

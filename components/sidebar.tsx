@@ -6,6 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   HardDrive,
   Trash2,
   Star,
@@ -25,6 +32,7 @@ interface SidebarProps {
 export function Sidebar({ className, onNewClick }: SidebarProps) {
   const [storage, setStorage] = useState<StorageUsage | null>(null);
   const [activeItem, setActiveItem] = useState("my-drive");
+  const [buyStorageModalOpen, setBuyStorageModalOpen] = useState(false);
 
   useEffect(() => {
     fetchStorageUsage();
@@ -161,6 +169,7 @@ export function Sidebar({ className, onNewClick }: SidebarProps) {
                   variant="outline"
                   size="sm"
                   className="w-full text-xs h-8 rounded-lg border-blue-200 text-blue-600 hover:bg-blue-50"
+                  onClick={() => setBuyStorageModalOpen(true)}
                 >
                   Buy storage
                 </Button>
@@ -188,6 +197,19 @@ export function Sidebar({ className, onNewClick }: SidebarProps) {
           </button>
         </div>
       </div>
+
+      {/* Buy Storage Modal */}
+      <Dialog open={buyStorageModalOpen} onOpenChange={setBuyStorageModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Coming Soon</DialogTitle>
+            <DialogDescription>
+              We&apos;re working hard to bring you storage upgrade options. This
+              feature will be available soon!
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
