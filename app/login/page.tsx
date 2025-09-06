@@ -35,7 +35,7 @@ export default function LoginPage() {
               <div className="w-6 h-6 bg-primary-foreground rounded-lg"></div>
             </div>
             <h1 className="text-3xl font-bold text-foreground tracking-tight">
-              SimpleDrive
+              Mini Drive
             </h1>
           </div>
         </div>

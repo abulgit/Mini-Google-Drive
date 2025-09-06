@@ -49,7 +49,7 @@ export default function Home() {
                 <div className="w-5 h-5 bg-primary-foreground rounded-md"></div>
               </div>
               <h1 className="text-2xl font-bold text-foreground tracking-tight">
-                SimpleDrive
+                Mini Drive
               </h1>
             </div>
             <Button
@@ -138,7 +138,7 @@ export default function Home() {
                             <div className="w-4 h-4 bg-primary-foreground rounded-sm"></div>
                           </div>
                           <span className="font-semibold text-card-foreground">
-                            SimpleDrive
+                            Mini Drive
                           </span>
                         </div>
                         <div className="flex space-x-1">

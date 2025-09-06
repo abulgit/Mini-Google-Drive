@@ -182,7 +182,7 @@ export function FileGrid({ files, onFileDeleted }: FileGridProps) {
           No files yet
         </h3>
         <p className="text-muted-foreground max-w-sm">
-          Upload your first file to get started with SimpleDrive
+          Upload your first file to get started with Mini Drive
         </p>
       </div>
     );

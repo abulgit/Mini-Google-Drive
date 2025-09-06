@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SimpleDrive - Personal Cloud Storage",
+  title: "Mini Drive - Personal Cloud Storage",
   description: "5GB free personal cloud storage with Google authentication",
 };
 

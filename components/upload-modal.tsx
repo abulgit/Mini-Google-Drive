@@ -175,7 +175,7 @@ export function UploadModal({
             Upload File
           </DialogTitle>
           <DialogDescription>
-            Choose a file to upload to your SimpleDrive
+            Choose a file to upload to your Mini Drive
           </DialogDescription>
         </DialogHeader>
 
