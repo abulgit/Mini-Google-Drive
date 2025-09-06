@@ -18,25 +18,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import {
-  Search,
-  Grid3X3,
-  List,
-  Settings,
-  HelpCircle,
-  SlidersHorizontal,
-} from "lucide-react";
+import { Search, Settings, HelpCircle, SlidersHorizontal } from "lucide-react";
 
 interface DashboardHeaderProps {
-  viewMode?: "grid" | "list";
-  onViewModeChange?: (mode: "grid" | "list") => void;
   onUploadClick?: () => void;
 }
 
-export function DashboardHeader({
-  viewMode = "grid",
-  onViewModeChange,
-}: DashboardHeaderProps) {
+export function DashboardHeader({}: DashboardHeaderProps) {
   const { data: session } = useSession();
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -58,73 +46,44 @@ export function DashboardHeader({
 
   return (
     <TooltipProvider>
-      <header className="border-b border-gray-200 bg-white sticky top-0 z-40">
+      <header className="border-b border-border bg-card sticky top-0 z-40">
         <div className="flex items-center justify-between px-6 py-3">
           {/* Left Section - Logo and Search */}
           <div className="flex items-center gap-6 flex-1">
             {/* Logo */}
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-                <div className="w-4 h-4 bg-white rounded-sm"></div>
+              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                <div className="w-4 h-4 bg-primary-foreground rounded-sm"></div>
               </div>
-              <h1 className="text-xl font-normal text-gray-700">SimpleDrive</h1>
+              <h1 className="text-xl font-normal text-card-foreground">
+                SimpleDrive
+              </h1>
             </div>
 
             {/* Search */}
             <div className="flex-1 max-w-2xl">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                 <Input
                   type="text"
                   placeholder="Search in Drive"
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-4 py-2 w-full bg-gray-50 border-0 rounded-full focus:bg-white focus:shadow-md focus:ring-2 focus:ring-blue-100 transition-all"
+                  className="pl-10 pr-4 py-2 w-full bg-muted border-0 rounded-full focus:bg-card focus:shadow-md focus:ring-2 focus:ring-ring transition-all"
                 />
                 <Button
                   variant="ghost"
                   size="sm"
                   className="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 p-0 rounded-full"
                 >
-                  <SlidersHorizontal className="w-4 h-4 text-gray-400" />
+                  <SlidersHorizontal className="w-4 h-4 text-muted-foreground" />
                 </Button>
               </div>
             </div>
           </div>
 
-          {/* Right Section - View Options and Profile */}
+          {/* Right Section - Profile */}
           <div className="flex items-center gap-2">
-            {/* View Toggle */}
-            <div className="flex items-center bg-gray-100 rounded-lg p-1">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant={viewMode === "list" ? "secondary" : "ghost"}
-                    size="sm"
-                    onClick={() => onViewModeChange?.("list")}
-                    className="w-8 h-8 p-0 rounded-md"
-                  >
-                    <List className="w-4 h-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>List view</TooltipContent>
-              </Tooltip>
-
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant={viewMode === "grid" ? "secondary" : "ghost"}
-                    size="sm"
-                    onClick={() => onViewModeChange?.("grid")}
-                    className="w-8 h-8 p-0 rounded-md"
-                  >
-                    <Grid3X3 className="w-4 h-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Grid view</TooltipContent>
-              </Tooltip>
-            </div>
-
             {/* Settings Button */}
             <Tooltip>
               <TooltipTrigger asChild>
@@ -133,7 +92,7 @@ export function DashboardHeader({
                   size="sm"
                   className="w-10 h-10 p-0 rounded-full"
                 >
-                  <Settings className="w-5 h-5 text-gray-600" />
+                  <Settings className="w-5 h-5 text-muted-foreground" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Settings</TooltipContent>
@@ -147,7 +106,7 @@ export function DashboardHeader({
                   size="sm"
                   className="w-10 h-10 p-0 rounded-full"
                 >
-                  <HelpCircle className="w-5 h-5 text-gray-600" />
+                  <HelpCircle className="w-5 h-5 text-muted-foreground" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Help</TooltipContent>
@@ -162,7 +121,7 @@ export function DashboardHeader({
                       src={session?.user?.image || ""}
                       alt="Profile"
                     />
-                    <AvatarFallback className="text-xs bg-blue-500 text-white">
+                    <AvatarFallback className="text-xs bg-primary text-primary-foreground">
                       {getInitials(session?.user?.name)}
                     </AvatarFallback>
                   </Avatar>
@@ -176,15 +135,15 @@ export function DashboardHeader({
                         src={session?.user?.image || ""}
                         alt="Profile"
                       />
-                      <AvatarFallback className="bg-blue-500 text-white">
+                      <AvatarFallback className="bg-primary text-primary-foreground">
                         {getInitials(session?.user?.name)}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
-                      <div className="font-medium text-gray-900 truncate">
+                      <div className="font-medium text-card-foreground truncate">
                         {session?.user?.name}
                       </div>
-                      <div className="text-sm text-gray-600 truncate">
+                      <div className="text-sm text-muted-foreground truncate">
                         {session?.user?.email}
                       </div>
                     </div>
@@ -202,7 +161,7 @@ export function DashboardHeader({
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={handleSignOut}
-                  className="flex items-center gap-2 cursor-pointer text-red-600 focus:text-red-600"
+                  className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive"
                 >
                   Sign out
                 </DropdownMenuItem>

@@ -94,7 +94,7 @@ export function Sidebar({ className, onNewClick }: SidebarProps) {
   return (
     <div
       className={cn(
-        "flex flex-col h-full bg-white border-r border-gray-200",
+        "flex flex-col h-full bg-card border-r border-border",
         className
       )}
     >
@@ -102,11 +102,11 @@ export function Sidebar({ className, onNewClick }: SidebarProps) {
       <div className="p-4">
         <Button
           onClick={onNewClick}
-          className="w-full justify-start gap-3 h-12 bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 shadow-sm rounded-2xl font-medium"
+          className="w-full justify-start gap-3 h-12 bg-card hover:bg-muted text-card-foreground border border-border shadow-sm rounded-2xl font-medium"
           variant="outline"
         >
-          <div className="w-6 h-6 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center">
-            <Plus className="w-4 h-4 text-white" />
+          <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
+            <Plus className="w-4 h-4 text-primary-foreground" />
           </div>
           New
         </Button>
@@ -126,14 +126,14 @@ export function Sidebar({ className, onNewClick }: SidebarProps) {
                 className={cn(
                   "w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors",
                   isActive
-                    ? "bg-blue-50 text-blue-700"
-                    : "text-gray-700 hover:bg-gray-100"
+                    ? "bg-primary/10 text-primary"
+                    : "text-card-foreground hover:bg-muted"
                 )}
               >
                 <Icon
                   className={cn(
                     "w-5 h-5",
-                    isActive ? "text-blue-700" : "text-gray-500"
+                    isActive ? "text-primary" : "text-muted-foreground"
                   )}
                 />
                 <span className="flex-1 text-left">{item.label}</span>
@@ -150,16 +150,18 @@ export function Sidebar({ className, onNewClick }: SidebarProps) {
         {/* Storage Section */}
         <div className="mt-8 px-3">
           <div className="space-y-3">
-            <div className="text-sm font-medium text-gray-900">Storage</div>
+            <div className="text-sm font-medium text-card-foreground">
+              Storage
+            </div>
 
             {storage ? (
               <div className="space-y-3">
                 <div className="space-y-2">
                   <Progress
                     value={storage.percentage}
-                    className="h-2 bg-gray-100"
+                    className="h-2 bg-muted"
                   />
-                  <div className="flex justify-between text-xs text-gray-600">
+                  <div className="flex justify-between text-xs text-muted-foreground">
                     <span>{formatBytes(storage.used)} used</span>
                     <span>of {formatBytes(storage.total)}</span>
                   </div>
@@ -168,7 +170,7 @@ export function Sidebar({ className, onNewClick }: SidebarProps) {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="w-full text-xs h-8 rounded-lg border-blue-200 text-blue-600 hover:bg-blue-50"
+                  className="w-full text-xs h-8 rounded-lg border-primary text-primary hover:bg-primary/10"
                   onClick={() => setBuyStorageModalOpen(true)}
                 >
                   Buy storage
@@ -176,8 +178,8 @@ export function Sidebar({ className, onNewClick }: SidebarProps) {
               </div>
             ) : (
               <div className="space-y-2">
-                <div className="h-2 bg-gray-200 rounded animate-pulse"></div>
-                <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+                <div className="h-2 bg-muted rounded animate-pulse"></div>
+                <div className="h-4 bg-muted rounded animate-pulse"></div>
               </div>
             )}
           </div>
@@ -185,14 +187,14 @@ export function Sidebar({ className, onNewClick }: SidebarProps) {
       </div>
 
       {/* Bottom Actions */}
-      <div className="p-3 border-t border-gray-100">
+      <div className="p-3 border-t border-border">
         <div className="space-y-1">
-          <button className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
-            <Settings className="w-5 h-5 text-gray-500" />
+          <button className="w-full flex items-center gap-3 px-3 py-2 text-sm text-card-foreground hover:bg-muted rounded-lg transition-colors">
+            <Settings className="w-5 h-5 text-muted-foreground" />
             <span>Settings</span>
           </button>
-          <button className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
-            <HelpCircle className="w-5 h-5 text-gray-500" />
+          <button className="w-full flex items-center gap-3 px-3 py-2 text-sm text-card-foreground hover:bg-muted rounded-lg transition-colors">
+            <HelpCircle className="w-5 h-5 text-muted-foreground" />
             <span>Help</span>
           </button>
         </div>

@@ -171,7 +171,7 @@ export function UploadModal({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <FileUp className="w-5 h-5 text-blue-600" />
+            <FileUp className="w-5 h-5 text-primary" />
             Upload File
           </DialogTitle>
           <DialogDescription>
@@ -197,9 +197,9 @@ export function UploadModal({
             className={cn(
               "relative border-2 border-dashed rounded-lg p-8 text-center transition-all duration-200 min-h-[200px] flex flex-col items-center justify-center",
               dragOver
-                ? "border-blue-400 bg-blue-50"
-                : "border-gray-300 hover:border-gray-400 bg-gray-50/50",
-              uploading && "border-blue-400 bg-blue-50"
+                ? "border-primary bg-primary/5"
+                : "border-border hover:border-primary/50 bg-muted/20",
+              uploading && "border-primary bg-primary/5"
             )}
             onDrop={handleDrop}
             onDragOver={handleDragOver}
@@ -207,23 +207,23 @@ export function UploadModal({
           >
             {uploading ? (
               <div className="space-y-4">
-                <div className="w-16 h-16 mx-auto bg-blue-100 rounded-full flex items-center justify-center">
-                  <Cloud className="w-8 h-8 text-blue-600" />
+                <div className="w-16 h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center">
+                  <Cloud className="w-8 h-8 text-primary" />
                 </div>
                 <div className="space-y-2">
-                  <h3 className="text-lg font-medium text-gray-900">
+                  <h3 className="text-lg font-medium text-foreground">
                     {uploadComplete ? "Upload Complete!" : "Uploading file..."}
                   </h3>
-                  <div className="w-full bg-gray-200 rounded-full h-2 max-w-xs mx-auto">
+                  <div className="w-full bg-muted rounded-full h-2 max-w-xs mx-auto">
                     <div
                       className={cn(
                         "h-2 rounded-full transition-all duration-300",
-                        uploadComplete ? "bg-green-600" : "bg-blue-600"
+                        uploadComplete ? "bg-green-600" : "bg-primary"
                       )}
                       style={{ width: `${uploadProgress}%` }}
                     ></div>
                   </div>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-muted-foreground">
                     {uploadComplete
                       ? "File uploaded successfully!"
                       : `${uploadProgress}% complete`}
@@ -238,32 +238,32 @@ export function UploadModal({
                 <div
                   className={cn(
                     "w-16 h-16 mx-auto rounded-full flex items-center justify-center transition-colors",
-                    dragOver ? "bg-blue-100" : "bg-gray-100"
+                    dragOver ? "bg-primary/10" : "bg-muted"
                   )}
                 >
                   <Upload
                     className={cn(
                       "w-8 h-8 transition-colors",
-                      dragOver ? "text-blue-600" : "text-gray-400"
+                      dragOver ? "text-primary" : "text-muted-foreground"
                     )}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <h3 className="text-lg font-medium text-gray-900">
+                  <h3 className="text-lg font-medium text-foreground">
                     {dragOver ? "Drop your file here" : "Drag and drop a file"}
                   </h3>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-muted-foreground">
                     or{" "}
                     <button
                       onClick={() => fileInputRef.current?.click()}
                       disabled={csrfLoading || !csrfToken}
-                      className="text-blue-600 hover:text-blue-700 font-medium"
+                      className="text-primary hover:text-primary/80 font-medium"
                     >
                       browse from your computer
                     </button>
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-muted-foreground">
                     Maximum file size: {formatBytes(STORAGE_LIMIT)}
                   </p>
                 </div>
@@ -273,12 +273,12 @@ export function UploadModal({
 
           {/* Error Display */}
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-sm text-red-700">
+            <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg flex items-center gap-2 text-sm text-destructive">
               <AlertCircle className="w-4 h-4 flex-shrink-0" />
               <span className="flex-1">{error}</span>
               <button
                 onClick={() => setError(null)}
-                className="text-red-500 hover:text-red-700"
+                className="text-destructive hover:text-destructive/80"
               >
                 <X className="w-4 h-4" />
               </button>

@@ -14,7 +14,6 @@ export default function DashboardPage() {
   const router = useRouter();
   const [files, setFiles] = useState<FileDocument[]>([]);
   const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
   useEffect(() => {
@@ -58,10 +57,10 @@ export default function DashboardPage() {
 
   if (status === "loading") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-muted/20">
         <div className="text-center">
-          <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading...</p>
         </div>
       </div>
     );
@@ -72,8 +71,8 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <DashboardHeader viewMode={viewMode} onViewModeChange={setViewMode} />
+    <div className="min-h-screen bg-background">
+      <DashboardHeader />
 
       <div className="flex h-[calc(100vh-73px)]">
         {/* Sidebar */}
@@ -88,15 +87,11 @@ export default function DashboardPage() {
               {/* Files Section */}
               {loading ? (
                 <div className="flex flex-col items-center justify-center py-16">
-                  <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                  <p className="mt-4 text-gray-600">Loading files...</p>
+                  <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                  <p className="mt-4 text-muted-foreground">Loading files...</p>
                 </div>
               ) : (
-                <FileGrid
-                  files={files}
-                  viewMode={viewMode}
-                  onFileDeleted={handleFileDeleted}
-                />
+                <FileGrid files={files} onFileDeleted={handleFileDeleted} />
               )}
             </div>
           </main>

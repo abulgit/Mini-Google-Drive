@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Grid3X3, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -44,14 +45,14 @@ import {
 
 interface FileGridProps {
   files: FileDocument[];
-  viewMode: "grid" | "list";
   onFileDeleted: () => void;
 }
 
-export function FileGrid({ files, viewMode, onFileDeleted }: FileGridProps) {
+export function FileGrid({ files, onFileDeleted }: FileGridProps) {
   const [deletingFiles, setDeletingFiles] = useState<Set<string>>(new Set());
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [fileToDelete, setFileToDelete] = useState<FileDocument | null>(null);
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const { csrfToken } = useCSRFToken();
 
   const formatBytes = (bytes: number) => {
@@ -94,24 +95,24 @@ export function FileGrid({ files, viewMode, onFileDeleted }: FileGridProps) {
 
   const getFileTypeColor = (fileType: string) => {
     if (fileType.startsWith("image/")) {
-      return "bg-green-100 text-green-700";
+      return "bg-green-50 text-green-700";
     }
     if (fileType.startsWith("video/")) {
-      return "bg-purple-100 text-purple-700";
+      return "bg-purple-50 text-purple-700";
     }
     if (fileType.startsWith("audio/")) {
-      return "bg-blue-100 text-blue-700";
+      return "bg-blue-50 text-blue-700";
     }
     if (fileType.includes("pdf")) {
-      return "bg-red-100 text-red-700";
+      return "bg-red-50 text-red-700";
     }
     if (fileType.includes("text")) {
-      return "bg-gray-100 text-gray-700";
+      return "bg-muted text-muted-foreground";
     }
     if (fileType.includes("zip") || fileType.includes("rar")) {
-      return "bg-orange-100 text-orange-700";
+      return "bg-orange-50 text-orange-700";
     }
-    return "bg-gray-100 text-gray-700";
+    return "bg-muted text-muted-foreground";
   };
 
   const handleDownload = async (fileId: string) => {
@@ -174,11 +175,13 @@ export function FileGrid({ files, viewMode, onFileDeleted }: FileGridProps) {
   if (files.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
-        <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
-          <Folder className="w-12 h-12 text-gray-400" />
+        <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-6">
+          <Folder className="w-12 h-12 text-muted-foreground" />
         </div>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">No files yet</h3>
-        <p className="text-gray-600 max-w-sm">
+        <h3 className="text-lg font-medium text-foreground mb-2">
+          No files yet
+        </h3>
+        <p className="text-muted-foreground max-w-sm">
           Upload your first file to get started with SimpleDrive
         </p>
       </div>
@@ -188,12 +191,40 @@ export function FileGrid({ files, viewMode, onFileDeleted }: FileGridProps) {
   if (viewMode === "list") {
     return (
       <TooltipProvider>
-        <div className="bg-white rounded-lg border border-gray-200">
-          <div className="px-6 py-4 border-b border-gray-100">
-            <h2 className="text-lg font-medium text-gray-900">Files</h2>
+        <div className="bg-card rounded-lg border border-border">
+          <div className="px-6 py-4 border-b border-border">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-medium text-card-foreground">
+                Files
+              </h2>
+              <div className="flex items-center gap-3">
+                <div className="text-sm text-muted-foreground">
+                  {files.length} items
+                </div>
+                {/* View Toggle */}
+                <div className="flex items-center bg-muted rounded-lg p-1">
+                  <Button
+                    variant={viewMode === "list" ? "secondary" : "ghost"}
+                    size="sm"
+                    onClick={() => setViewMode("list")}
+                    className="w-8 h-8 p-0 rounded-md"
+                  >
+                    <List className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant={viewMode === "grid" ? "secondary" : "ghost"}
+                    size="sm"
+                    onClick={() => setViewMode("grid")}
+                    className="w-8 h-8 p-0 rounded-md"
+                  >
+                    <Grid3X3 className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div className="divide-y divide-gray-100">
+          <div className="divide-y divide-border">
             {files.map(file => {
               const Icon = getFileIcon(file.fileType);
               const isDeleting = deletingFiles.has(file._id!.toString());
@@ -201,7 +232,7 @@ export function FileGrid({ files, viewMode, onFileDeleted }: FileGridProps) {
               return (
                 <div
                   key={file._id?.toString()}
-                  className="flex items-center px-6 py-4 hover:bg-gray-50 group"
+                  className="flex items-center px-6 py-4 hover:bg-muted/50 group"
                 >
                   <div className="flex items-center flex-1 min-w-0">
                     <div
@@ -211,12 +242,12 @@ export function FileGrid({ files, viewMode, onFileDeleted }: FileGridProps) {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p
-                        className="text-sm font-medium text-gray-900 truncate"
+                        className="text-sm font-medium text-card-foreground truncate"
                         title={file.originalFileName}
                       >
                         {file.originalFileName}
                       </p>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-muted-foreground">
                         {formatDate(file.uploadedAt)} •{" "}
                         {formatBytes(file.fileSize)}
                       </p>
@@ -257,7 +288,7 @@ export function FileGrid({ files, viewMode, onFileDeleted }: FileGridProps) {
                         <DropdownMenuItem
                           onClick={() => handleDelete(file._id!.toString())}
                           disabled={isDeleting}
-                          className="text-red-600 focus:text-red-600"
+                          className="text-destructive focus:text-destructive"
                         >
                           <Trash2 className="w-4 h-4 mr-2" />
                           {isDeleting ? "Deleting..." : "Delete"}
@@ -312,8 +343,31 @@ export function FileGrid({ files, viewMode, onFileDeleted }: FileGridProps) {
     <TooltipProvider>
       <div>
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-medium text-gray-900">Files</h2>
-          <div className="text-sm text-gray-600">{files.length} items</div>
+          <h2 className="text-lg font-medium text-foreground">Files</h2>
+          <div className="flex items-center gap-3">
+            <div className="text-sm text-muted-foreground">
+              {files.length} items
+            </div>
+            {/* View Toggle */}
+            <div className="flex items-center bg-muted rounded-lg p-1">
+              <Button
+                variant={viewMode === "list" ? "secondary" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode("list")}
+                className="w-8 h-8 p-0 rounded-md"
+              >
+                <List className="w-4 h-4" />
+              </Button>
+              <Button
+                variant={viewMode === "grid" ? "secondary" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode("grid")}
+                className="w-8 h-8 p-0 rounded-md"
+              >
+                <Grid3X3 className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
@@ -323,7 +377,7 @@ export function FileGrid({ files, viewMode, onFileDeleted }: FileGridProps) {
 
             return (
               <div key={file._id?.toString()} className="group">
-                <div className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md hover:border-blue-200 transition-all cursor-pointer">
+                <div className="bg-card border border-border rounded-lg p-4 hover:shadow-md hover:border-primary/20 transition-all cursor-pointer">
                   <div className="flex items-center justify-between mb-3">
                     <div
                       className={`w-10 h-10 rounded-lg flex items-center justify-center ${getFileTypeColor(file.fileType)}`}
@@ -360,7 +414,7 @@ export function FileGrid({ files, viewMode, onFileDeleted }: FileGridProps) {
                         <DropdownMenuItem
                           onClick={() => handleDelete(file._id!.toString())}
                           disabled={isDeleting}
-                          className="text-red-600 focus:text-red-600"
+                          className="text-destructive focus:text-destructive"
                         >
                           <Trash2 className="w-4 h-4 mr-2" />
                           {isDeleting ? "Deleting..." : "Delete"}
@@ -372,7 +426,7 @@ export function FileGrid({ files, viewMode, onFileDeleted }: FileGridProps) {
                   <div className="space-y-1">
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <p className="text-sm font-medium text-gray-900 truncate">
+                        <p className="text-sm font-medium text-card-foreground truncate">
                           {file.originalFileName}
                         </p>
                       </TooltipTrigger>
@@ -383,12 +437,12 @@ export function FileGrid({ files, viewMode, onFileDeleted }: FileGridProps) {
                       <Badge variant="secondary" className="text-xs">
                         {file.fileType.split("/")[1]?.toUpperCase() || "FILE"}
                       </Badge>
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-muted-foreground">
                         {formatBytes(file.fileSize)}
                       </span>
                     </div>
 
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-muted-foreground">
                       {formatDate(file.uploadedAt)}
                     </p>
                   </div>
