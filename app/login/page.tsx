@@ -22,33 +22,43 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-muted/20 flex items-center justify-center p-6">
-      <div className="w-full max-w-md">
-        {/* Logo/Brand */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">
-            Simple<span className="text-muted-foreground">Drive</span>
-          </h1>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30 flex items-center justify-center p-6">
+      <div className="w-full max-w-md space-y-8">
+        {/* Background decorative elements */}
+        <div className="absolute top-20 left-10 w-20 h-20 bg-primary/10 rounded-full blur-xl"></div>
+        <div className="absolute bottom-20 right-10 w-32 h-32 bg-accent/10 rounded-full blur-xl"></div>
+
+        {/* Logo */}
+        <div className="text-center relative z-10">
+          <div className="flex items-center justify-center space-x-3 mb-12">
+            <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center shadow-xl">
+              <div className="w-6 h-6 bg-primary-foreground rounded-lg"></div>
+            </div>
+            <h1 className="text-3xl font-bold text-foreground tracking-tight">
+              SimpleDrive
+            </h1>
+          </div>
         </div>
 
         {/* Login Card */}
-        <div className="bg-card rounded-2xl shadow-sm border border-border p-8 space-y-6">
-          <div className="text-center space-y-2">
-            <h2 className="text-2xl font-semibold text-card-foreground">
-              Welcome back
-            </h2>
-            <p className="text-muted-foreground">
-              Sign in to access your cloud storage
-            </p>
-          </div>
+        <div className="bg-card/80 backdrop-blur-sm rounded-3xl border border-border/50 p-8 shadow-2xl relative z-10">
+          <div className="space-y-8">
+            <div className="text-center space-y-3">
+              <h2 className="text-2xl font-bold text-card-foreground">
+                Welcome back
+              </h2>
+              <p className="text-muted-foreground text-base leading-relaxed">
+                Sign in with Google to access your secure cloud storage
+              </p>
+            </div>
 
-          <div className="space-y-4">
             <Button
               onClick={handleGoogleSignIn}
-              className="w-full flex items-center justify-center py-3 px-4 bg-card hover:bg-muted border border-border text-card-foreground rounded-lg font-medium transition-colors duration-200"
+              variant="outline"
               size="lg"
+              className="w-full h-14 text-base font-semibold border-2 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-[1.02] dark:border-border dark:bg-card dark:text-card-foreground dark:hover:bg-muted"
             >
-              <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
+              <svg className="w-6 h-6 mr-3" viewBox="0 0 24 24">
                 <path
                   fill="#4285F4"
                   d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -68,19 +78,38 @@ export default function LoginPage() {
               </svg>
               Continue with Google
             </Button>
-          </div>
 
-          <div className="text-center">
-            <p className="text-sm text-muted-foreground">
-              Get 5GB of free cloud storage
-            </p>
+            <div className="space-y-4">
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-border/50"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-4 bg-card text-muted-foreground font-medium">
+                    Free Storage
+                  </span>
+                </div>
+              </div>
+
+              <div className="text-center space-y-3">
+                <div className="inline-flex items-center px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
+                  <span className="text-2xl mr-2">🎉</span>
+                  <span className="text-primary font-medium">
+                    5GB free storage
+                  </span>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  No credit card required • Secure with Google • Access anywhere
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="text-center mt-8">
-          <p className="text-xs text-muted-foreground/60">
-            Secure • Private • Easy to use
+        <div className="text-center relative z-10">
+          <p className="text-sm text-muted-foreground/70">
+            By signing in, you agree to our terms of service
           </p>
         </div>
       </div>
