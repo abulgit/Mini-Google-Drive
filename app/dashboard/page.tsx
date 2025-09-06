@@ -4,9 +4,9 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { DashboardHeader } from "@/components/dashboard-header";
-import { StorageUsageCard } from "@/components/storage-usage";
-import { FileUpload } from "@/components/file-upload";
-import { FileList } from "@/components/file-list";
+import { Sidebar } from "@/components/sidebar";
+import { FileGrid } from "@/components/file-grid";
+import { UploadModal } from "@/components/upload-modal";
 import type { FileDocument } from "@/types";
 
 export default function DashboardPage() {
@@ -14,6 +14,8 @@ export default function DashboardPage() {
   const router = useRouter();
   const [files, setFiles] = useState<FileDocument[]>([]);
   const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
   useEffect(() => {
     if (status === "loading") {
@@ -50,12 +52,16 @@ export default function DashboardPage() {
     fetchFiles(); // Refresh file list and storage usage
   };
 
+  const handleNewClick = () => {
+    setIsUploadModalOpen(true);
+  };
+
   if (status === "loading") {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Loading...</p>
+          <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
         </div>
       </div>
     );
@@ -67,29 +73,42 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <DashboardHeader />
+      <DashboardHeader viewMode={viewMode} onViewModeChange={setViewMode} />
 
-      <main className="container mx-auto px-4 py-8">
-        <div className="space-y-8">
-          {/* Storage Usage */}
-          <div className="max-w-md">
-            <StorageUsageCard />
-          </div>
-
-          {/* File Upload */}
-          <FileUpload onUploadSuccess={handleUploadSuccess} />
-
-          {/* File List */}
-          {loading ? (
-            <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="mt-4 text-muted-foreground">Loading files...</p>
-            </div>
-          ) : (
-            <FileList files={files} onFileDeleted={handleFileDeleted} />
-          )}
+      <div className="flex h-[calc(100vh-73px)]">
+        {/* Sidebar */}
+        <div className="w-64 flex-shrink-0">
+          <Sidebar onNewClick={handleNewClick} />
         </div>
-      </main>
+
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <main className="flex-1 overflow-auto">
+            <div className="p-6">
+              {/* Files Section */}
+              {loading ? (
+                <div className="flex flex-col items-center justify-center py-16">
+                  <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                  <p className="mt-4 text-gray-600">Loading files...</p>
+                </div>
+              ) : (
+                <FileGrid
+                  files={files}
+                  viewMode={viewMode}
+                  onFileDeleted={handleFileDeleted}
+                />
+              )}
+            </div>
+          </main>
+        </div>
+      </div>
+
+      {/* Upload Modal */}
+      <UploadModal
+        isOpen={isUploadModalOpen}
+        onClose={() => setIsUploadModalOpen(false)}
+        onUploadSuccess={handleUploadSuccess}
+      />
     </div>
   );
 }

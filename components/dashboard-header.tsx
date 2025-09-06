@@ -1,54 +1,216 @@
 "use client";
 
+import { useState } from "react";
 import { signOut, useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
+import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  Search,
+  Grid3X3,
+  List,
+  Settings,
+  HelpCircle,
+  SlidersHorizontal,
+} from "lucide-react";
 
-export function DashboardHeader() {
+interface DashboardHeaderProps {
+  viewMode?: "grid" | "list";
+  onViewModeChange?: (mode: "grid" | "list") => void;
+  onUploadClick?: () => void;
+}
+
+export function DashboardHeader({
+  viewMode = "grid",
+  onViewModeChange,
+}: DashboardHeaderProps) {
   const { data: session } = useSession();
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleSignOut = () => {
     signOut({ callbackUrl: "/" });
   };
 
+  const getInitials = (name?: string | null) => {
+    if (!name) {
+      return "U";
+    }
+    return name
+      .split(" ")
+      .map(n => n[0])
+      .join("")
+      .toUpperCase()
+      .substring(0, 2);
+  };
+
   return (
-    <header className="border-b">
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-3">
-            <div className="text-2xl font-bold text-blue-600">SimpleDrive</div>
-            <div className="text-sm text-muted-foreground">
-              Personal Cloud Storage
+    <TooltipProvider>
+      <header className="border-b border-gray-200 bg-white sticky top-0 z-40">
+        <div className="flex items-center justify-between px-6 py-3">
+          {/* Left Section - Logo and Search */}
+          <div className="flex items-center gap-6 flex-1">
+            {/* Logo */}
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                <div className="w-4 h-4 bg-white rounded-sm"></div>
+              </div>
+              <h1 className="text-xl font-normal text-gray-700">SimpleDrive</h1>
+            </div>
+
+            {/* Search */}
+            <div className="flex-1 max-w-2xl">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Input
+                  type="text"
+                  placeholder="Search in Drive"
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  className="pl-10 pr-4 py-2 w-full bg-gray-50 border-0 rounded-full focus:bg-white focus:shadow-md focus:ring-2 focus:ring-blue-100 transition-all"
+                />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 p-0 rounded-full"
+                >
+                  <SlidersHorizontal className="w-4 h-4 text-gray-400" />
+                </Button>
+              </div>
             </div>
           </div>
 
-          <div className="flex items-center space-x-4">
-            {session?.user && (
-              <div className="flex items-center space-x-3">
-                <div className="text-sm">
-                  <div className="font-medium">{session.user.name}</div>
-                  <div className="text-muted-foreground">
-                    {session.user.email}
+          {/* Right Section - View Options and Profile */}
+          <div className="flex items-center gap-2">
+            {/* View Toggle */}
+            <div className="flex items-center bg-gray-100 rounded-lg p-1">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant={viewMode === "list" ? "secondary" : "ghost"}
+                    size="sm"
+                    onClick={() => onViewModeChange?.("list")}
+                    className="w-8 h-8 p-0 rounded-md"
+                  >
+                    <List className="w-4 h-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>List view</TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant={viewMode === "grid" ? "secondary" : "ghost"}
+                    size="sm"
+                    onClick={() => onViewModeChange?.("grid")}
+                    className="w-8 h-8 p-0 rounded-md"
+                  >
+                    <Grid3X3 className="w-4 h-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Grid view</TooltipContent>
+              </Tooltip>
+            </div>
+
+            {/* Settings Button */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-10 h-10 p-0 rounded-full"
+                >
+                  <Settings className="w-5 h-5 text-gray-600" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Settings</TooltipContent>
+            </Tooltip>
+
+            {/* Help Button */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-10 h-10 p-0 rounded-full"
+                >
+                  <HelpCircle className="w-5 h-5 text-gray-600" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Help</TooltipContent>
+            </Tooltip>
+
+            {/* Profile Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="w-10 h-10 p-0 rounded-full">
+                  <Avatar className="w-8 h-8">
+                    <AvatarImage
+                      src={session?.user?.image || ""}
+                      alt="Profile"
+                    />
+                    <AvatarFallback className="text-xs bg-blue-500 text-white">
+                      {getInitials(session?.user?.name)}
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-72">
+                <div className="p-4">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="w-12 h-12">
+                      <AvatarImage
+                        src={session?.user?.image || ""}
+                        alt="Profile"
+                      />
+                      <AvatarFallback className="bg-blue-500 text-white">
+                        {getInitials(session?.user?.name)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-gray-900 truncate">
+                        {session?.user?.name}
+                      </div>
+                      <div className="text-sm text-gray-600 truncate">
+                        {session?.user?.email}
+                      </div>
+                    </div>
                   </div>
                 </div>
-                {session.user.image && (
-                  <Image
-                    src={session.user.image}
-                    alt="Profile"
-                    width={32}
-                    height={32}
-                    className="w-8 h-8 rounded-full"
-                  />
-                )}
-              </div>
-            )}
-
-            <Button variant="outline" onClick={handleSignOut}>
-              Sign Out
-            </Button>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="flex items-center gap-2 cursor-pointer">
+                  <Settings className="w-4 h-4" />
+                  Account settings
+                </DropdownMenuItem>
+                <DropdownMenuItem className="flex items-center gap-2 cursor-pointer">
+                  <HelpCircle className="w-4 h-4" />
+                  Help & feedback
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={handleSignOut}
+                  className="flex items-center gap-2 cursor-pointer text-red-600 focus:text-red-600"
+                >
+                  Sign out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
-      </div>
-    </header>
+      </header>
+    </TooltipProvider>
   );
 }

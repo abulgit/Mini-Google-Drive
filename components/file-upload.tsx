@@ -2,19 +2,22 @@
 
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { STORAGE_LIMIT } from "@/types";
 import { useCSRFToken } from "@/hooks/useCSRFToken";
+import { cn } from "@/lib/utils";
+import { Upload, X, CheckCircle, AlertCircle, Cloud, Plus } from "lucide-react";
 
 interface FileUploadProps {
   onUploadSuccess: () => void;
+  className?: string;
 }
 
-export function FileUpload({ onUploadSuccess }: FileUploadProps) {
+export function FileUpload({ onUploadSuccess, className }: FileUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { csrfToken, loading: csrfLoading } = useCSRFToken();
 
@@ -29,27 +32,19 @@ export function FileUpload({ onUploadSuccess }: FileUploadProps) {
   };
 
   const validateFile = (file: File): string | null => {
-    // Check file size - max 5GB per file
     if (file.size > STORAGE_LIMIT) {
       return `File size (${formatBytes(file.size)}) exceeds maximum limit of ${formatBytes(STORAGE_LIMIT)}`;
     }
-
-    // Check for empty files
     if (file.size === 0) {
       return "Cannot upload empty files";
     }
-
-    // Basic file name validation
     if (!file.name || file.name.trim() === "") {
       return "File must have a valid name";
     }
-
-    // Check for potentially dangerous file names
     const dangerousChars = /[<>:"/\\|?*]/;
     if (dangerousChars.test(file.name)) {
       return "File name contains invalid characters";
     }
-
     return null;
   };
 
@@ -72,10 +67,16 @@ export function FileUpload({ onUploadSuccess }: FileUploadProps) {
 
     setUploading(true);
     setError(null);
+    setUploadProgress(0);
 
     try {
       const formData = new FormData();
       formData.append("file", file);
+
+      // Simulate progress for better UX
+      const progressInterval = setInterval(() => {
+        setUploadProgress(prev => Math.min(prev + 10, 90));
+      }, 200);
 
       const response = await fetch("/api/upload", {
         method: "POST",
@@ -85,17 +86,28 @@ export function FileUpload({ onUploadSuccess }: FileUploadProps) {
         body: formData,
       });
 
+      clearInterval(progressInterval);
+      setUploadProgress(100);
+
       const data = await response.json();
 
       if (!response.ok) {
         throw new Error(data.error || "Upload failed");
       }
 
-      onUploadSuccess();
+      // Show success state briefly
+      setTimeout(() => {
+        onUploadSuccess();
+        setUploadProgress(0);
+      }, 1000);
     } catch (error) {
       setError(error instanceof Error ? error.message : "Upload failed");
+      setUploadProgress(0);
     } finally {
-      setUploading(false);
+      setTimeout(() => {
+        setUploading(false);
+      }, 1000);
+
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
@@ -123,63 +135,133 @@ export function FileUpload({ onUploadSuccess }: FileUploadProps) {
   };
 
   return (
-    <Card>
-      <CardContent className="p-6">
-        <div
-          className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-            dragOver
-              ? "border-blue-400 bg-blue-50"
-              : "border-gray-300 hover:border-gray-400"
-          }`}
-          onDrop={handleDrop}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
+    <div className={cn("w-full", className)}>
+      {/* Compact Upload Button for Sidebar */}
+      <div className="mb-6">
+        <Button
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploading || csrfLoading || !csrfToken}
+          className="w-full justify-start gap-3 h-12 bg-blue-600 hover:bg-blue-700 text-white border-0 shadow-sm rounded-lg font-medium"
         >
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <h3 className="text-lg font-medium">Upload Files</h3>
-              <p className="text-sm text-muted-foreground">
-                Drag and drop files here, or click to select
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Maximum file size: {formatBytes(STORAGE_LIMIT)}
-              </p>
-            </div>
+          {uploading ? (
+            <>
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              Uploading... {uploadProgress}%
+            </>
+          ) : (
+            <>
+              <Plus className="w-5 h-5" />
+              New Upload
+            </>
+          )}
+        </Button>
+      </div>
 
-            <div className="space-y-2">
-              <Input
-                ref={fileInputRef}
-                type="file"
-                className="hidden"
-                onChange={e => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    handleFileSelect(file);
-                  }
-                }}
-              />
+      {/* Drop Zone */}
+      <div
+        className={cn(
+          "relative border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200",
+          dragOver
+            ? "border-blue-400 bg-blue-50"
+            : "border-gray-300 hover:border-gray-400 bg-gray-50/50",
+          uploading && "border-blue-400 bg-blue-50"
+        )}
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+      >
+        <Input
+          ref={fileInputRef}
+          type="file"
+          className="hidden"
+          onChange={e => {
+            const file = e.target.files?.[0];
+            if (file) {
+              handleFileSelect(file);
+            }
+          }}
+        />
 
-              <Button
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploading || csrfLoading || !csrfToken}
-                variant="outline"
-              >
-                {uploading
-                  ? "Uploading..."
-                  : csrfLoading
-                    ? "Loading..."
-                    : "Select File"}
-              </Button>
-            </div>
-
-            {error && (
-              <div className="text-sm text-red-600 bg-red-50 p-2 rounded">
-                {error}
+        <div className="space-y-4">
+          {uploading ? (
+            <div className="space-y-4">
+              <div className="w-16 h-16 mx-auto bg-blue-100 rounded-full flex items-center justify-center">
+                <Cloud className="w-8 h-8 text-blue-600" />
               </div>
-            )}
-          </div>
+              <div className="space-y-2">
+                <h3 className="text-lg font-medium text-gray-900">
+                  Uploading file...
+                </h3>
+                <div className="w-full bg-gray-200 rounded-full h-2 max-w-xs mx-auto">
+                  <div
+                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${uploadProgress}%` }}
+                  ></div>
+                </div>
+                <p className="text-sm text-gray-600">
+                  {uploadProgress}% complete
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div
+                className={cn(
+                  "w-16 h-16 mx-auto rounded-full flex items-center justify-center transition-colors",
+                  dragOver ? "bg-blue-100" : "bg-gray-100"
+                )}
+              >
+                <Upload
+                  className={cn(
+                    "w-8 h-8 transition-colors",
+                    dragOver ? "text-blue-600" : "text-gray-400"
+                  )}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <h3 className="text-lg font-medium text-gray-900">
+                  {dragOver ? "Drop files here" : "Drag files to upload"}
+                </h3>
+                <p className="text-sm text-gray-600">
+                  or{" "}
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="text-blue-600 hover:text-blue-700 font-medium"
+                  >
+                    browse from your computer
+                  </button>
+                </p>
+                <p className="text-xs text-gray-500">
+                  Maximum file size: {formatBytes(STORAGE_LIMIT)}
+                </p>
+              </div>
+            </div>
+          )}
         </div>
-      </CardContent>
-    </Card>
+
+        {/* Error Display */}
+        {error && (
+          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-sm text-red-700">
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <span>{error}</span>
+            <button
+              onClick={() => setError(null)}
+              className="ml-auto text-red-500 hover:text-red-700"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+        {/* Success State */}
+        {uploading && uploadProgress === 100 && (
+          <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2 text-sm text-green-700">
+            <CheckCircle className="w-4 h-4" />
+            <span>File uploaded successfully!</span>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
