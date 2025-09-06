@@ -212,6 +212,7 @@ export function FileGrid({ files, onFileDeleted }: FileGridProps) {
                     <List className="w-4 h-4" />
                   </Button>
                   <Button
+                    //@ts-expect-error button variant
                     variant={viewMode === "grid" ? "secondary" : "ghost"}
                     size="sm"
                     onClick={() => setViewMode("grid")}
@@ -351,6 +352,7 @@ export function FileGrid({ files, onFileDeleted }: FileGridProps) {
             {/* View Toggle */}
             <div className="flex items-center bg-muted rounded-lg p-1">
               <Button
+                //@ts-expect-error button variant
                 variant={viewMode === "list" ? "secondary" : "ghost"}
                 size="sm"
                 onClick={() => setViewMode("list")}

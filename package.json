@@ -7,6 +7,7 @@
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "next lint",
+    "type": "tsc --noEmit",
     "format": "prettier --write .",
     "prettier": "prettier --check .",
     "check": "npm run lint && npm run prettier"
