@@ -19,6 +19,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Search, Settings, HelpCircle, SlidersHorizontal } from "lucide-react";
+import ThemeToggleButton from "@/components/ui/theme-toggle-button";
 
 interface DashboardHeaderProps {
   onUploadClick?: () => void;
@@ -84,6 +85,9 @@ export function DashboardHeader({}: DashboardHeaderProps) {
 
           {/* Right Section - Profile */}
           <div className="flex items-center gap-2">
+            {/* Theme Toggle Button */}
+            <ThemeToggleButton variant="circle" start="center" />
+
             {/* Settings Button */}
             <Tooltip>
               <TooltipTrigger asChild>
