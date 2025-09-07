@@ -32,6 +32,7 @@ import {
   MoreVertical,
   Download,
   Trash2,
+  Star,
   RotateCcw,
   FileText,
   Image as ImageIcon,
@@ -39,22 +40,38 @@ import {
   Music,
   Archive,
   File,
+  Folder,
 } from "lucide-react";
 
-interface TrashFileGridProps {
+interface FileDisplayProps {
   files: FileDocument[];
-  onFileUpdated: () => void;
+  mode: "files" | "trash";
+  onFileDeleted: () => void;
+  onFileUpdated?: () => void;
 }
 
-export function TrashFileGrid({ files, onFileUpdated }: TrashFileGridProps) {
+export function FileDisplay({
+  files,
+  mode,
+  onFileDeleted,
+  onFileUpdated,
+}: FileDisplayProps) {
+  const [deletingFiles, setDeletingFiles] = useState<Set<string>>(new Set());
   const [processingFiles, setProcessingFiles] = useState<Set<string>>(
     new Set()
   );
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [permanentDeleteDialogOpen, setPermanentDeleteDialogOpen] =
     useState(false);
   const [fileToDelete, setFileToDelete] = useState<FileDocument | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const { csrfToken } = useCSRFToken();
+
+  // Helper functions for button variants
+  const getListButtonVariant = () =>
+    viewMode === "list" ? "secondary" : "ghost";
+  const getGridButtonVariant = () =>
+    viewMode === "grid" ? "secondary" : "ghost";
 
   const formatBytes = (bytes: number) => {
     if (bytes === 0) {
@@ -131,6 +148,33 @@ export function TrashFileGrid({ files, onFileUpdated }: TrashFileGridProps) {
     }
   };
 
+  const handleStarToggle = async (fileId: string, currentStarred: boolean) => {
+    if (!csrfToken) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/files/${fileId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": csrfToken,
+        },
+        body: JSON.stringify({ starred: !currentStarred }),
+      });
+
+      if (response.ok) {
+        toast.success(!currentStarred ? "File starred" : "File unstarred");
+        onFileDeleted(); // Refresh the file list
+      } else {
+        toast.error("Failed to update star status");
+      }
+    } catch (error) {
+      console.error("Star toggle failed:", error);
+      toast.error("Failed to update star status");
+    }
+  };
+
   const handleRestore = async (fileId: string) => {
     if (!csrfToken) {
       return;
@@ -148,7 +192,7 @@ export function TrashFileGrid({ files, onFileUpdated }: TrashFileGridProps) {
 
       if (response.ok) {
         toast.success("File restored successfully");
-        onFileUpdated();
+        onFileUpdated?.();
       } else {
         toast.error("Failed to restore file");
       }
@@ -164,11 +208,50 @@ export function TrashFileGrid({ files, onFileUpdated }: TrashFileGridProps) {
     }
   };
 
-  const handlePermanentDelete = async (fileId: string) => {
+  const handleDelete = async (fileId: string) => {
     const file = files.find(f => f._id!.toString() === fileId);
     if (file) {
-      setFileToDelete(file);
-      setPermanentDeleteDialogOpen(true);
+      if (mode === "trash") {
+        setFileToDelete(file);
+        setPermanentDeleteDialogOpen(true);
+      } else {
+        setFileToDelete(file);
+        setDeleteDialogOpen(true);
+      }
+    }
+  };
+
+  const confirmDelete = async () => {
+    if (!fileToDelete || !csrfToken) {
+      return;
+    }
+
+    const fileId = fileToDelete._id!.toString();
+    setDeleteDialogOpen(false);
+    setDeletingFiles(prev => new Set(prev).add(fileId));
+
+    try {
+      const response = await fetch(`/api/files/${fileId}`, {
+        method: "DELETE",
+        headers: { "X-CSRF-Token": csrfToken },
+      });
+
+      if (response.ok) {
+        toast.success("File moved to trash");
+        onFileDeleted();
+      } else {
+        toast.error("Failed to move file to trash");
+      }
+    } catch (error) {
+      console.error("Move to trash failed:", error);
+      toast.error("Failed to move file to trash");
+    } finally {
+      setDeletingFiles(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(fileId);
+        return newSet;
+      });
+      setFileToDelete(null);
     }
   };
 
@@ -189,7 +272,7 @@ export function TrashFileGrid({ files, onFileUpdated }: TrashFileGridProps) {
 
       if (response.ok) {
         toast.success("File permanently deleted");
-        onFileUpdated();
+        onFileUpdated?.();
       } else {
         toast.error("Failed to delete file permanently");
       }
@@ -209,15 +292,22 @@ export function TrashFileGrid({ files, onFileUpdated }: TrashFileGridProps) {
   if (files.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
-        <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-6">
-          <Trash2 className="w-12 h-12 text-muted-foreground" />
+        <div
+          className={`w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-6 ${mode === "trash" ? "opacity-70" : ""}`}
+        >
+          {mode === "trash" ? (
+            <Trash2 className="w-12 h-12 text-muted-foreground" />
+          ) : (
+            <Folder className="w-12 h-12 text-muted-foreground" />
+          )}
         </div>
         <h3 className="text-lg font-medium text-foreground mb-2">
-          Trash is empty
+          {mode === "trash" ? "Trash is empty" : "No files yet"}
         </h3>
         <p className="text-muted-foreground max-w-sm">
-          Deleted files will appear here. You can restore them or delete them
-          permanently.
+          {mode === "trash"
+            ? "Deleted files will appear here. You can restore them or delete them permanently."
+            : "Upload your first file to get started with Mini Drive"}
         </p>
       </div>
     );
@@ -230,7 +320,7 @@ export function TrashFileGrid({ files, onFileUpdated }: TrashFileGridProps) {
           <div className="px-6 py-4 border-b border-border">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-medium text-card-foreground">
-                Trash
+                {mode === "trash" ? "Trash" : "Files"}
               </h2>
               <div className="flex items-center gap-3">
                 <div className="text-sm text-muted-foreground">
@@ -239,7 +329,7 @@ export function TrashFileGrid({ files, onFileUpdated }: TrashFileGridProps) {
                 {/* View Toggle */}
                 <div className="flex items-center bg-muted rounded-lg p-1">
                   <Button
-                    variant={viewMode === "list" ? "secondary" : "ghost"}
+                    variant={getListButtonVariant()}
                     size="sm"
                     onClick={() => setViewMode("list")}
                     className="w-8 h-8 p-0 rounded-md"
@@ -247,8 +337,7 @@ export function TrashFileGrid({ files, onFileUpdated }: TrashFileGridProps) {
                     <List className="w-4 h-4" />
                   </Button>
                   <Button
-                    //@ts-expect-error button variant
-                    variant={viewMode === "grid" ? "secondary" : "ghost"}
+                    variant={getGridButtonVariant()}
                     size="sm"
                     onClick={() => setViewMode("grid")}
                     className="w-8 h-8 p-0 rounded-md"
@@ -263,12 +352,13 @@ export function TrashFileGrid({ files, onFileUpdated }: TrashFileGridProps) {
           <div className="divide-y divide-border">
             {files.map(file => {
               const Icon = getFileIcon(file.fileType);
+              const isDeleting = deletingFiles.has(file._id!.toString());
               const isProcessing = processingFiles.has(file._id!.toString());
 
               return (
                 <div
                   key={file._id?.toString()}
-                  className="flex items-center px-6 py-4 hover:bg-muted/50 group opacity-70"
+                  className={`flex items-center px-6 py-4 hover:bg-muted/50 group ${mode === "trash" ? "opacity-70" : ""}`}
                 >
                   <div className="flex items-center flex-1 min-w-0">
                     <div
@@ -284,8 +374,9 @@ export function TrashFileGrid({ files, onFileUpdated }: TrashFileGridProps) {
                         {file.originalFileName}
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        Deleted {formatDate(file.deletedAt!)} •{" "}
-                        {formatBytes(file.fileSize)}
+                        {mode === "trash"
+                          ? `Deleted ${formatDate(file.deletedAt!)} • ${formatBytes(file.fileSize)}`
+                          : `${formatDate(file.uploadedAt)} • ${formatBytes(file.fileSize)}`}
                       </p>
                     </div>
                   </div>
@@ -312,24 +403,58 @@ export function TrashFileGrid({ files, onFileUpdated }: TrashFileGridProps) {
                           <Download className="w-4 h-4 mr-2" />
                           Download
                         </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => handleRestore(file._id!.toString())}
-                          disabled={isProcessing}
-                        >
-                          <RotateCcw className="w-4 h-4 mr-2" />
-                          {isProcessing ? "Restoring..." : "Restore"}
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          onClick={() =>
-                            handlePermanentDelete(file._id!.toString())
-                          }
-                          disabled={isProcessing}
-                          className="text-destructive focus:text-destructive"
-                        >
-                          <Trash2 className="w-4 h-4 mr-2" />
-                          Delete permanently
-                        </DropdownMenuItem>
+
+                        {mode === "files" ? (
+                          <>
+                            <DropdownMenuItem
+                              onClick={() =>
+                                handleStarToggle(
+                                  file._id!.toString(),
+                                  file.starred || false
+                                )
+                              }
+                            >
+                              <Star
+                                className={`w-4 h-4 mr-2 ${file.starred ? "fill-current" : ""}`}
+                              />
+                              {file.starred
+                                ? "Remove from starred"
+                                : "Add to starred"}
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={() => handleDelete(file._id!.toString())}
+                              disabled={isDeleting}
+                              className="text-destructive focus:text-destructive"
+                            >
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              {isDeleting
+                                ? "Moving to trash..."
+                                : "Move to trash"}
+                            </DropdownMenuItem>
+                          </>
+                        ) : (
+                          <>
+                            <DropdownMenuItem
+                              onClick={() =>
+                                handleRestore(file._id!.toString())
+                              }
+                              disabled={isProcessing}
+                            >
+                              <RotateCcw className="w-4 h-4 mr-2" />
+                              {isProcessing ? "Restoring..." : "Restore"}
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={() => handleDelete(file._id!.toString())}
+                              disabled={isProcessing}
+                              className="text-destructive focus:text-destructive"
+                            >
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              Delete permanently
+                            </DropdownMenuItem>
+                          </>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
@@ -338,6 +463,39 @@ export function TrashFileGrid({ files, onFileUpdated }: TrashFileGridProps) {
             })}
           </div>
         </div>
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Move to Trash</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to move &quot;
+                {fileToDelete?.originalFileName}&quot; to trash? You can restore
+                it later from the trash.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setDeleteDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={confirmDelete}
+                disabled={deletingFiles.has(
+                  fileToDelete?._id?.toString() || ""
+                )}
+              >
+                {deletingFiles.has(fileToDelete?._id?.toString() || "")
+                  ? "Moving to trash..."
+                  : "Move to trash"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Permanent Delete Confirmation Dialog */}
         <Dialog
@@ -383,7 +541,9 @@ export function TrashFileGrid({ files, onFileUpdated }: TrashFileGridProps) {
     <TooltipProvider>
       <div>
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-medium text-foreground">Trash</h2>
+          <h2 className="text-lg font-medium text-foreground">
+            {mode === "trash" ? "Trash" : "Files"}
+          </h2>
           <div className="flex items-center gap-3">
             <div className="text-sm text-muted-foreground">
               {files.length} items
@@ -391,8 +551,7 @@ export function TrashFileGrid({ files, onFileUpdated }: TrashFileGridProps) {
             {/* View Toggle */}
             <div className="flex items-center bg-muted rounded-lg p-1">
               <Button
-                //@ts-expect-error button variant
-                variant={viewMode === "list" ? "secondary" : "ghost"}
+                variant={getListButtonVariant()}
                 size="sm"
                 onClick={() => setViewMode("list")}
                 className="w-8 h-8 p-0 rounded-md"
@@ -400,7 +559,7 @@ export function TrashFileGrid({ files, onFileUpdated }: TrashFileGridProps) {
                 <List className="w-4 h-4" />
               </Button>
               <Button
-                variant={viewMode === "grid" ? "secondary" : "ghost"}
+                variant={getGridButtonVariant()}
                 size="sm"
                 onClick={() => setViewMode("grid")}
                 className="w-8 h-8 p-0 rounded-md"
@@ -414,11 +573,14 @@ export function TrashFileGrid({ files, onFileUpdated }: TrashFileGridProps) {
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
           {files.map(file => {
             const Icon = getFileIcon(file.fileType);
+            const isDeleting = deletingFiles.has(file._id!.toString());
             const isProcessing = processingFiles.has(file._id!.toString());
 
             return (
               <div key={file._id?.toString()} className="group">
-                <div className="bg-card border border-border rounded-lg p-4 hover:shadow-md hover:border-primary/20 transition-all cursor-pointer opacity-70">
+                <div
+                  className={`bg-card border border-border rounded-lg p-4 hover:shadow-md hover:border-primary/20 transition-all cursor-pointer ${mode === "trash" ? "opacity-70" : ""}`}
+                >
                   <div className="flex items-center justify-between mb-3">
                     <div
                       className={`w-10 h-10 rounded-lg flex items-center justify-center ${getFileTypeColor(file.fileType)}`}
@@ -443,24 +605,58 @@ export function TrashFileGrid({ files, onFileUpdated }: TrashFileGridProps) {
                           <Download className="w-4 h-4 mr-2" />
                           Download
                         </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => handleRestore(file._id!.toString())}
-                          disabled={isProcessing}
-                        >
-                          <RotateCcw className="w-4 h-4 mr-2" />
-                          {isProcessing ? "Restoring..." : "Restore"}
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          onClick={() =>
-                            handlePermanentDelete(file._id!.toString())
-                          }
-                          disabled={isProcessing}
-                          className="text-destructive focus:text-destructive"
-                        >
-                          <Trash2 className="w-4 h-4 mr-2" />
-                          Delete permanently
-                        </DropdownMenuItem>
+
+                        {mode === "files" ? (
+                          <>
+                            <DropdownMenuItem
+                              onClick={() =>
+                                handleStarToggle(
+                                  file._id!.toString(),
+                                  file.starred || false
+                                )
+                              }
+                            >
+                              <Star
+                                className={`w-4 h-4 mr-2 ${file.starred ? "fill-current" : ""}`}
+                              />
+                              {file.starred
+                                ? "Remove from starred"
+                                : "Add to starred"}
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={() => handleDelete(file._id!.toString())}
+                              disabled={isDeleting}
+                              className="text-destructive focus:text-destructive"
+                            >
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              {isDeleting
+                                ? "Moving to trash..."
+                                : "Move to trash"}
+                            </DropdownMenuItem>
+                          </>
+                        ) : (
+                          <>
+                            <DropdownMenuItem
+                              onClick={() =>
+                                handleRestore(file._id!.toString())
+                              }
+                              disabled={isProcessing}
+                            >
+                              <RotateCcw className="w-4 h-4 mr-2" />
+                              {isProcessing ? "Restoring..." : "Restore"}
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={() => handleDelete(file._id!.toString())}
+                              disabled={isProcessing}
+                              className="text-destructive focus:text-destructive"
+                            >
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              Delete permanently
+                            </DropdownMenuItem>
+                          </>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
@@ -485,7 +681,9 @@ export function TrashFileGrid({ files, onFileUpdated }: TrashFileGridProps) {
                     </div>
 
                     <p className="text-xs text-muted-foreground">
-                      Deleted {formatDate(file.deletedAt!)}
+                      {mode === "trash"
+                        ? `Deleted ${formatDate(file.deletedAt!)}`
+                        : formatDate(file.uploadedAt)}
                     </p>
                   </div>
                 </div>
@@ -494,6 +692,37 @@ export function TrashFileGrid({ files, onFileUpdated }: TrashFileGridProps) {
           })}
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Move to Trash</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to move &quot;
+              {fileToDelete?.originalFileName}&quot; to trash? You can restore
+              it later from the trash.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmDelete}
+              disabled={deletingFiles.has(fileToDelete?._id?.toString() || "")}
+            >
+              {deletingFiles.has(fileToDelete?._id?.toString() || "")
+                ? "Moving to trash..."
+                : "Move to trash"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Permanent Delete Confirmation Dialog */}
       <Dialog

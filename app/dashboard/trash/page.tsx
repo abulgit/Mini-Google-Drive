@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { DashboardHeader } from "@/components/dashboard-header";
 import { Sidebar } from "@/components/sidebar";
 import { UploadModal } from "@/components/upload-modal";
-import { TrashFileGrid } from "@/components/trash-file-grid";
+import { FileDisplay } from "@/components/FileDisplay";
 import type { FileDocument } from "@/types";
 
 export default function TrashPage() {
@@ -93,8 +93,10 @@ export default function TrashPage() {
                   </p>
                 </div>
               ) : (
-                <TrashFileGrid
+                <FileDisplay
+                  mode="trash"
                   files={files}
+                  onFileDeleted={handleFileUpdated}
                   onFileUpdated={handleFileUpdated}
                 />
               )}

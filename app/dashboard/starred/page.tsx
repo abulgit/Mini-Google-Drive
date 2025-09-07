@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { DashboardHeader } from "@/components/dashboard-header";
 import { Sidebar } from "@/components/sidebar";
-import { FileGrid } from "@/components/file-grid";
+import { FileDisplay } from "@/components/FileDisplay";
 import { UploadModal } from "@/components/upload-modal";
 import type { FileDocument } from "@/types";
 
@@ -93,7 +93,11 @@ export default function StarredPage() {
                   </p>
                 </div>
               ) : (
-                <FileGrid files={files} onFileDeleted={handleFileDeleted} />
+                <FileDisplay
+                  mode="files"
+                  files={files}
+                  onFileDeleted={handleFileDeleted}
+                />
               )}
             </div>
           </main>
