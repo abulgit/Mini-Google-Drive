@@ -14,19 +14,19 @@ export async function GET(_request: NextRequest) {
 
     const { db } = await connectToDatabase();
 
-    // Get all non-deleted files for the user, sorted by upload date (newest first)
+    // Get all deleted files for the user, sorted by deletion date (newest first)
     const files = await db
       .collection<FileDocument>("files")
       .find({
         userId: session.user.id,
-        deletedAt: { $exists: false }, // Exclude deleted files
+        deletedAt: { $exists: true }, // Only deleted files
       })
-      .sort({ uploadedAt: -1 })
+      .sort({ deletedAt: -1 })
       .toArray();
 
     return NextResponse.json({ files });
   } catch (error) {
-    console.error("Files fetch error:", error);
+    console.error("Trash files fetch error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

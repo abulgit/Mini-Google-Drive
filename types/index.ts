@@ -23,6 +23,7 @@ export interface FileDocument {
   blobUrl: string; // Azure Blob Storage URL
   uploadedAt: Date;
   starred?: boolean; // Whether the file is starred by the user
+  deletedAt?: Date; // When the file was moved to trash (soft delete)
 }
 
 // File upload response type

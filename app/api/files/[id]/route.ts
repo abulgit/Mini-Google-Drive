@@ -2,10 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/mongodb";
-import { deleteFileFromBlob } from "@/lib/azure-storage";
 import { validateCSRFToken, createCSRFError } from "@/lib/csrf-middleware";
 import { ObjectId } from "mongodb";
-import type { FileDocument, User } from "@/types";
+import type { FileDocument } from "@/types";
 
 export async function PATCH(
   request: NextRequest,
@@ -83,32 +82,24 @@ export async function DELETE(
     const file = await db.collection<FileDocument>("files").findOne({
       _id: new ObjectId(id),
       userId: session.user.id,
+      deletedAt: { $exists: false }, // Only allow soft delete of non-deleted files
     });
 
     if (!file) {
       return NextResponse.json({ error: "File not found" }, { status: 404 });
     }
 
-    // Delete from Azure Blob Storage
-    await deleteFileFromBlob(session.user.id, file.fileName);
-
-    // Delete from MongoDB
-    await db.collection<FileDocument>("files").deleteOne({
-      _id: new ObjectId(id),
-    });
-
-    // Update user's total storage used
-    await db.collection<User>("users").updateOne(
-      { userId: session.user.id },
+    // Soft delete: Set deletedAt timestamp
+    await db.collection<FileDocument>("files").updateOne(
+      { _id: new ObjectId(id) },
       {
-        $inc: { totalStorageUsed: -file.fileSize },
-        $set: { updatedAt: new Date() },
+        $set: { deletedAt: new Date() },
       }
     );
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, message: "File moved to trash" });
   } catch (error) {
-    console.error("Delete error:", error);
+    console.error("Soft delete error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

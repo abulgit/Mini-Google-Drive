@@ -14,12 +14,13 @@ export async function GET(_request: NextRequest) {
 
     const { db } = await connectToDatabase();
 
-    // Get all starred files for the user, sorted by upload date (newest first)
+    // Get all starred and non-deleted files for the user, sorted by upload date (newest first)
     const files = await db
       .collection<FileDocument>("files")
       .find({
         userId: session.user.id,
         starred: true,
+        deletedAt: { $exists: false }, // Exclude deleted files
       })
       .sort({ uploadedAt: -1 })
       .toArray();

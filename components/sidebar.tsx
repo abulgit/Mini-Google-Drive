@@ -95,7 +95,7 @@ export function Sidebar({ className, onNewClick }: SidebarProps) {
         // Future implementation
         break;
       case "trash":
-        // Future implementation
+        router.push("/dashboard/trash");
         break;
     }
   };

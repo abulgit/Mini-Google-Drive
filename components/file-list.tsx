@@ -147,15 +147,15 @@ export function FileList({ files, onFileDeleted }: FileListProps) {
       });
 
       if (response.ok) {
-        toast.success("File deleted successfully");
+        toast.success("File moved to trash");
         onFileDeleted();
       } else {
-        toast.error("Failed to delete file");
-        throw new Error("Delete failed");
+        toast.error("Failed to move file to trash");
+        throw new Error("Move to trash failed");
       }
     } catch (error) {
-      console.error("Delete failed:", error);
-      toast.error("Failed to delete file");
+      console.error("Move to trash failed:", error);
+      toast.error("Failed to move file to trash");
     } finally {
       setDeletingFiles(prev => {
         const newSet = new Set(prev);
@@ -252,8 +252,8 @@ export function FileList({ files, onFileDeleted }: FileListProps) {
                         disabled={deletingFiles.has(file._id!.toString())}
                       >
                         {deletingFiles.has(file._id!.toString())
-                          ? "Deleting..."
-                          : "Delete"}
+                          ? "Moving to trash..."
+                          : "Move to trash"}
                       </Button>
                     </div>
                   </TableCell>
@@ -268,11 +268,11 @@ export function FileList({ files, onFileDeleted }: FileListProps) {
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete File</DialogTitle>
+            <DialogTitle>Move to Trash</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete &quot;
-              {fileToDelete?.originalFileName}&quot;? This action cannot be
-              undone.
+              Are you sure you want to move &quot;
+              {fileToDelete?.originalFileName}&quot; to trash? You can restore
+              it later from the trash.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -288,8 +288,8 @@ export function FileList({ files, onFileDeleted }: FileListProps) {
               disabled={deletingFiles.has(fileToDelete?._id?.toString() || "")}
             >
               {deletingFiles.has(fileToDelete?._id?.toString() || "")
-                ? "Deleting..."
-                : "Delete"}
+                ? "Moving to trash..."
+                : "Move to trash"}
             </Button>
           </DialogFooter>
         </DialogContent>
