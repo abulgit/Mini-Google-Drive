@@ -12,13 +12,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Search, Settings, HelpCircle, SlidersHorizontal } from "lucide-react";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { Search, SlidersHorizontal } from "lucide-react";
 import ThemeToggleButton from "@/components/ui/theme-toggle-button";
 import Image from "next/image";
 
@@ -93,34 +88,6 @@ export function DashboardHeader({}: DashboardHeaderProps) {
             {/* Theme Toggle Button */}
             <ThemeToggleButton variant="circle" start="center" />
 
-            {/* Settings Button */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="w-10 h-10 p-0 rounded-full"
-                >
-                  <Settings className="w-5 h-5 text-muted-foreground" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Settings</TooltipContent>
-            </Tooltip>
-
-            {/* Help Button */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="w-10 h-10 p-0 rounded-full"
-                >
-                  <HelpCircle className="w-5 h-5 text-muted-foreground" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Help</TooltipContent>
-            </Tooltip>
-
             {/* Profile Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -158,15 +125,6 @@ export function DashboardHeader({}: DashboardHeaderProps) {
                     </div>
                   </div>
                 </div>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="flex items-center gap-2 cursor-pointer">
-                  <Settings className="w-4 h-4" />
-                  Account settings
-                </DropdownMenuItem>
-                <DropdownMenuItem className="flex items-center gap-2 cursor-pointer">
-                  <HelpCircle className="w-4 h-4" />
-                  Help & feedback
-                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={handleSignOut}

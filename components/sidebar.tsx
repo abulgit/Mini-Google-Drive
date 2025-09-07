@@ -139,7 +139,6 @@ export function Sidebar({ className, onNewClick }: SidebarProps) {
         <Button
           onClick={onNewClick}
           className="w-full justify-start gap-3 h-12 bg-card hover:bg-muted text-card-foreground border border-border shadow-sm rounded-2xl font-medium"
-          variant="outline"
         >
           <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
             <Plus className="w-4 h-4 text-primary-foreground" />

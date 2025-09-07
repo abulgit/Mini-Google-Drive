@@ -2,13 +2,15 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { SigninModal } from "@/components/signin-modal";
 
 export default function Home() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const [isSigninModalOpen, setIsSigninModalOpen] = useState(false);
 
   useEffect(() => {
     if (status === "loading") {
@@ -21,7 +23,7 @@ export default function Home() {
   }, [session, status, router]);
 
   const handleGetStarted = () => {
-    router.push("/login");
+    setIsSigninModalOpen(true);
   };
 
   if (status === "loading") {
@@ -58,10 +60,9 @@ export default function Home() {
               </h1>
             </div>
             <Button
-              variant="outline"
               size="sm"
               onClick={handleGetStarted}
-              className="border-border/50 hover:bg-muted/50"
+              className="border border-border/50 text-foreground hover:bg-muted/50"
             >
               Sign in
             </Button>
@@ -91,20 +92,13 @@ export default function Home() {
                 </p>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+              <div className="flex justify-center lg:justify-start">
                 <Button
                   size="lg"
                   onClick={handleGetStarted}
                   className="px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
                 >
                   Get started free
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="lg"
-                  className="px-8 py-4 text-lg font-medium hover:bg-muted/80"
-                >
-                  Watch demo
                 </Button>
               </div>
 
@@ -232,6 +226,12 @@ export default function Home() {
           </div>
         </div>
       </main>
+
+      {/* Sign in Modal */}
+      <SigninModal
+        isOpen={isSigninModalOpen}
+        onClose={() => setIsSigninModalOpen(false)}
+      />
     </div>
   );
 }
