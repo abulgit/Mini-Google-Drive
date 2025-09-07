@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { useCSRFToken } from "@/hooks/useCSRFToken";
+import { ViewFileModal } from "@/components/view-file-modal";
 import type { FileDocument } from "@/types";
 import {
   MoreVertical,
@@ -65,6 +66,8 @@ export function FileDisplay({
     useState(false);
   const [fileToDelete, setFileToDelete] = useState<FileDocument | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [viewFile, setViewFile] = useState<FileDocument | null>(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const { csrfToken } = useCSRFToken();
 
   // Helper functions for button variants
@@ -221,6 +224,14 @@ export function FileDisplay({
     }
   };
 
+  const handleView = (fileId: string) => {
+    const file = files.find(f => f._id!.toString() === fileId);
+    if (file) {
+      setViewFile(file);
+      setIsViewModalOpen(true);
+    }
+  };
+
   const confirmDelete = async () => {
     if (!fileToDelete || !csrfToken) {
       return;
@@ -313,13 +324,176 @@ export function FileDisplay({
     );
   }
 
-  if (viewMode === "list") {
-    return (
-      <TooltipProvider>
-        <div className="bg-card rounded-lg border border-border">
-          <div className="px-6 py-4 border-b border-border">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-medium text-card-foreground">
+  // Render both view modes conditionally and always render dialogs and modal
+  return (
+    <>
+      {viewMode === "list" ? (
+        <TooltipProvider>
+          <div className="bg-card rounded-lg border border-border">
+            <div className="px-6 py-4 border-b border-border">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-medium text-card-foreground">
+                  {mode === "trash" ? "Trash" : "Files"}
+                </h2>
+                <div className="flex items-center gap-3">
+                  <div className="text-sm text-muted-foreground">
+                    {files.length} items
+                  </div>
+                  {/* View Toggle */}
+                  <div className="flex items-center bg-muted rounded-lg p-1">
+                    <Button
+                      variant={getListButtonVariant()}
+                      size="sm"
+                      onClick={() => setViewMode("list")}
+                      className="w-8 h-8 p-0 rounded-md"
+                    >
+                      <List className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant={getGridButtonVariant()}
+                      size="sm"
+                      onClick={() => setViewMode("grid")}
+                      className="w-8 h-8 p-0 rounded-md"
+                    >
+                      <Grid3X3 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="divide-y divide-border">
+              {files.map(file => {
+                const Icon = getFileIcon(file.fileType);
+                const isDeleting = deletingFiles.has(file._id!.toString());
+                const isProcessing = processingFiles.has(file._id!.toString());
+
+                return (
+                  <div
+                    key={file._id?.toString()}
+                    className={`flex items-center px-6 py-4 hover:bg-muted/50 group ${mode === "trash" ? "opacity-70" : ""}`}
+                  >
+                    <div className="flex items-center flex-1 min-w-0">
+                      <div
+                        className={`w-10 h-10 rounded-lg flex items-center justify-center mr-4 cursor-pointer ${getFileTypeColor(file.fileType)}`}
+                        onClick={e => {
+                          e.stopPropagation();
+                          handleView(file._id!.toString());
+                        }}
+                      >
+                        <Icon className="w-5 h-5" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p
+                          className="text-sm font-medium text-card-foreground truncate cursor-pointer"
+                          title={file.originalFileName}
+                          onClick={e => {
+                            e.stopPropagation();
+                            handleView(file._id!.toString());
+                          }}
+                        >
+                          {file.originalFileName}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {mode === "trash"
+                            ? `Deleted ${formatDate(file.deletedAt!)} • ${formatBytes(file.fileSize)}`
+                            : `${formatDate(file.uploadedAt)} • ${formatBytes(file.fileSize)}`}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary" className="text-xs">
+                        {file.fileType.split("/")[1]?.toUpperCase() || "FILE"}
+                      </Badge>
+
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="w-8 h-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <MoreVertical className="w-4 h-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={() => handleDownload(file._id!.toString())}
+                          >
+                            <Download className="w-4 h-4 mr-2" />
+                            Download
+                          </DropdownMenuItem>
+
+                          {mode === "files" ? (
+                            <>
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  handleStarToggle(
+                                    file._id!.toString(),
+                                    file.starred || false
+                                  )
+                                }
+                              >
+                                <Star
+                                  className={`w-4 h-4 mr-2 ${file.starred ? "fill-current" : ""}`}
+                                />
+                                {file.starred
+                                  ? "Remove from starred"
+                                  : "Add to starred"}
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  handleDelete(file._id!.toString())
+                                }
+                                disabled={isDeleting}
+                                className="text-destructive focus:text-destructive"
+                              >
+                                <Trash2 className="w-4 h-4 mr-2" />
+                                {isDeleting
+                                  ? "Moving to trash..."
+                                  : "Move to trash"}
+                              </DropdownMenuItem>
+                            </>
+                          ) : (
+                            <>
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  handleRestore(file._id!.toString())
+                                }
+                                disabled={isProcessing}
+                              >
+                                <RotateCcw className="w-4 h-4 mr-2" />
+                                {isProcessing ? "Restoring..." : "Restore"}
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  handleDelete(file._id!.toString())
+                                }
+                                disabled={isProcessing}
+                                className="text-destructive focus:text-destructive"
+                              >
+                                <Trash2 className="w-4 h-4 mr-2" />
+                                Delete permanently
+                              </DropdownMenuItem>
+                            </>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </TooltipProvider>
+      ) : (
+        <TooltipProvider>
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-medium text-foreground">
                 {mode === "trash" ? "Trash" : "Files"}
               </h2>
               <div className="flex items-center gap-3">
@@ -347,351 +521,144 @@ export function FileDisplay({
                 </div>
               </div>
             </div>
-          </div>
 
-          <div className="divide-y divide-border">
-            {files.map(file => {
-              const Icon = getFileIcon(file.fileType);
-              const isDeleting = deletingFiles.has(file._id!.toString());
-              const isProcessing = processingFiles.has(file._id!.toString());
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+              {files.map(file => {
+                const Icon = getFileIcon(file.fileType);
+                const isDeleting = deletingFiles.has(file._id!.toString());
+                const isProcessing = processingFiles.has(file._id!.toString());
 
-              return (
-                <div
-                  key={file._id?.toString()}
-                  className={`flex items-center px-6 py-4 hover:bg-muted/50 group ${mode === "trash" ? "opacity-70" : ""}`}
-                >
-                  <div className="flex items-center flex-1 min-w-0">
+                return (
+                  <div key={file._id?.toString()} className="group">
                     <div
-                      className={`w-10 h-10 rounded-lg flex items-center justify-center mr-4 ${getFileTypeColor(file.fileType)}`}
+                      className={`bg-card border border-border rounded-lg p-4 hover:shadow-md hover:border-primary/20 transition-all ${mode === "trash" ? "opacity-70" : ""}`}
                     >
-                      <Icon className="w-5 h-5" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p
-                        className="text-sm font-medium text-card-foreground truncate"
-                        title={file.originalFileName}
-                      >
-                        {file.originalFileName}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {mode === "trash"
-                          ? `Deleted ${formatDate(file.deletedAt!)} • ${formatBytes(file.fileSize)}`
-                          : `${formatDate(file.uploadedAt)} • ${formatBytes(file.fileSize)}`}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary" className="text-xs">
-                      {file.fileType.split("/")[1]?.toUpperCase() || "FILE"}
-                    </Badge>
-
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="w-8 h-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                      <div className="flex items-center justify-between mb-3">
+                        <div
+                          className={`w-10 h-10 rounded-lg flex items-center justify-center cursor-pointer ${getFileTypeColor(file.fileType)}`}
+                          onClick={() => handleView(file._id!.toString())}
                         >
-                          <MoreVertical className="w-4 h-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          onClick={() => handleDownload(file._id!.toString())}
-                        >
-                          <Download className="w-4 h-4 mr-2" />
-                          Download
-                        </DropdownMenuItem>
+                          <Icon className="w-5 h-5" />
+                        </div>
 
-                        {mode === "files" ? (
-                          <>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="w-6 h-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <MoreVertical className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
                             <DropdownMenuItem
                               onClick={() =>
-                                handleStarToggle(
-                                  file._id!.toString(),
-                                  file.starred || false
-                                )
+                                handleDownload(file._id!.toString())
                               }
                             >
-                              <Star
-                                className={`w-4 h-4 mr-2 ${file.starred ? "fill-current" : ""}`}
-                              />
-                              {file.starred
-                                ? "Remove from starred"
-                                : "Add to starred"}
+                              <Download className="w-4 h-4 mr-2" />
+                              Download
                             </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              onClick={() => handleDelete(file._id!.toString())}
-                              disabled={isDeleting}
-                              className="text-destructive focus:text-destructive"
+
+                            {mode === "files" ? (
+                              <>
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    handleStarToggle(
+                                      file._id!.toString(),
+                                      file.starred || false
+                                    )
+                                  }
+                                >
+                                  <Star
+                                    className={`w-4 h-4 mr-2 ${file.starred ? "fill-current" : ""}`}
+                                  />
+                                  {file.starred
+                                    ? "Remove from starred"
+                                    : "Add to starred"}
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    handleDelete(file._id!.toString())
+                                  }
+                                  disabled={isDeleting}
+                                  className="text-destructive focus:text-destructive"
+                                >
+                                  <Trash2 className="w-4 h-4 mr-2" />
+                                  {isDeleting
+                                    ? "Moving to trash..."
+                                    : "Move to trash"}
+                                </DropdownMenuItem>
+                              </>
+                            ) : (
+                              <>
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    handleRestore(file._id!.toString())
+                                  }
+                                  disabled={isProcessing}
+                                >
+                                  <RotateCcw className="w-4 h-4 mr-2" />
+                                  {isProcessing ? "Restoring..." : "Restore"}
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    handleDelete(file._id!.toString())
+                                  }
+                                  disabled={isProcessing}
+                                  className="text-destructive focus:text-destructive"
+                                >
+                                  <Trash2 className="w-4 h-4 mr-2" />
+                                  Delete permanently
+                                </DropdownMenuItem>
+                              </>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+
+                      <div className="space-y-1">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <p
+                              className="text-sm font-medium text-card-foreground truncate cursor-pointer"
+                              onClick={() => handleView(file._id!.toString())}
                             >
-                              <Trash2 className="w-4 h-4 mr-2" />
-                              {isDeleting
-                                ? "Moving to trash..."
-                                : "Move to trash"}
-                            </DropdownMenuItem>
-                          </>
-                        ) : (
-                          <>
-                            <DropdownMenuItem
-                              onClick={() =>
-                                handleRestore(file._id!.toString())
-                              }
-                              disabled={isProcessing}
-                            >
-                              <RotateCcw className="w-4 h-4 mr-2" />
-                              {isProcessing ? "Restoring..." : "Restore"}
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              onClick={() => handleDelete(file._id!.toString())}
-                              disabled={isProcessing}
-                              className="text-destructive focus:text-destructive"
-                            >
-                              <Trash2 className="w-4 h-4 mr-2" />
-                              Delete permanently
-                            </DropdownMenuItem>
-                          </>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+                              {file.originalFileName}
+                            </p>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {file.originalFileName}
+                          </TooltipContent>
+                        </Tooltip>
 
-        {/* Delete Confirmation Dialog */}
-        <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Move to Trash</DialogTitle>
-              <DialogDescription>
-                Are you sure you want to move &quot;
-                {fileToDelete?.originalFileName}&quot; to trash? You can restore
-                it later from the trash.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => setDeleteDialogOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={confirmDelete}
-                disabled={deletingFiles.has(
-                  fileToDelete?._id?.toString() || ""
-                )}
-              >
-                {deletingFiles.has(fileToDelete?._id?.toString() || "")
-                  ? "Moving to trash..."
-                  : "Move to trash"}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+                        <div className="flex items-center justify-between">
+                          <Badge variant="secondary" className="text-xs">
+                            {file.fileType.split("/")[1]?.toUpperCase() ||
+                              "FILE"}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground">
+                            {formatBytes(file.fileSize)}
+                          </span>
+                        </div>
 
-        {/* Permanent Delete Confirmation Dialog */}
-        <Dialog
-          open={permanentDeleteDialogOpen}
-          onOpenChange={setPermanentDeleteDialogOpen}
-        >
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Delete Permanently</DialogTitle>
-              <DialogDescription>
-                Are you sure you want to permanently delete &quot;
-                {fileToDelete?.originalFileName}&quot;? This action cannot be
-                undone and the file will be lost forever.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => setPermanentDeleteDialogOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={confirmPermanentDelete}
-                disabled={processingFiles.has(
-                  fileToDelete?._id?.toString() || ""
-                )}
-              >
-                {processingFiles.has(fileToDelete?._id?.toString() || "")
-                  ? "Deleting..."
-                  : "Delete Permanently"}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </TooltipProvider>
-    );
-  }
-
-  // Grid view
-  return (
-    <TooltipProvider>
-      <div>
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-medium text-foreground">
-            {mode === "trash" ? "Trash" : "Files"}
-          </h2>
-          <div className="flex items-center gap-3">
-            <div className="text-sm text-muted-foreground">
-              {files.length} items
-            </div>
-            {/* View Toggle */}
-            <div className="flex items-center bg-muted rounded-lg p-1">
-              <Button
-                variant={getListButtonVariant()}
-                size="sm"
-                onClick={() => setViewMode("list")}
-                className="w-8 h-8 p-0 rounded-md"
-              >
-                <List className="w-4 h-4" />
-              </Button>
-              <Button
-                variant={getGridButtonVariant()}
-                size="sm"
-                onClick={() => setViewMode("grid")}
-                className="w-8 h-8 p-0 rounded-md"
-              >
-                <Grid3X3 className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-          {files.map(file => {
-            const Icon = getFileIcon(file.fileType);
-            const isDeleting = deletingFiles.has(file._id!.toString());
-            const isProcessing = processingFiles.has(file._id!.toString());
-
-            return (
-              <div key={file._id?.toString()} className="group">
-                <div
-                  className={`bg-card border border-border rounded-lg p-4 hover:shadow-md hover:border-primary/20 transition-all cursor-pointer ${mode === "trash" ? "opacity-70" : ""}`}
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <div
-                      className={`w-10 h-10 rounded-lg flex items-center justify-center ${getFileTypeColor(file.fileType)}`}
-                    >
-                      <Icon className="w-5 h-5" />
-                    </div>
-
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="w-6 h-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <MoreVertical className="w-4 h-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          onClick={() => handleDownload(file._id!.toString())}
-                        >
-                          <Download className="w-4 h-4 mr-2" />
-                          Download
-                        </DropdownMenuItem>
-
-                        {mode === "files" ? (
-                          <>
-                            <DropdownMenuItem
-                              onClick={() =>
-                                handleStarToggle(
-                                  file._id!.toString(),
-                                  file.starred || false
-                                )
-                              }
-                            >
-                              <Star
-                                className={`w-4 h-4 mr-2 ${file.starred ? "fill-current" : ""}`}
-                              />
-                              {file.starred
-                                ? "Remove from starred"
-                                : "Add to starred"}
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              onClick={() => handleDelete(file._id!.toString())}
-                              disabled={isDeleting}
-                              className="text-destructive focus:text-destructive"
-                            >
-                              <Trash2 className="w-4 h-4 mr-2" />
-                              {isDeleting
-                                ? "Moving to trash..."
-                                : "Move to trash"}
-                            </DropdownMenuItem>
-                          </>
-                        ) : (
-                          <>
-                            <DropdownMenuItem
-                              onClick={() =>
-                                handleRestore(file._id!.toString())
-                              }
-                              disabled={isProcessing}
-                            >
-                              <RotateCcw className="w-4 h-4 mr-2" />
-                              {isProcessing ? "Restoring..." : "Restore"}
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              onClick={() => handleDelete(file._id!.toString())}
-                              disabled={isProcessing}
-                              className="text-destructive focus:text-destructive"
-                            >
-                              <Trash2 className="w-4 h-4 mr-2" />
-                              Delete permanently
-                            </DropdownMenuItem>
-                          </>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-
-                  <div className="space-y-1">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <p className="text-sm font-medium text-card-foreground truncate">
-                          {file.originalFileName}
+                        <p className="text-xs text-muted-foreground">
+                          {mode === "trash"
+                            ? `Deleted ${formatDate(file.deletedAt!)}`
+                            : formatDate(file.uploadedAt)}
                         </p>
-                      </TooltipTrigger>
-                      <TooltipContent>{file.originalFileName}</TooltipContent>
-                    </Tooltip>
-
-                    <div className="flex items-center justify-between">
-                      <Badge variant="secondary" className="text-xs">
-                        {file.fileType.split("/")[1]?.toUpperCase() || "FILE"}
-                      </Badge>
-                      <span className="text-xs text-muted-foreground">
-                        {formatBytes(file.fileSize)}
-                      </span>
+                      </div>
                     </div>
-
-                    <p className="text-xs text-muted-foreground">
-                      {mode === "trash"
-                        ? `Deleted ${formatDate(file.deletedAt!)}`
-                        : formatDate(file.uploadedAt)}
-                    </p>
                   </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+                );
+              })}
+            </div>
+          </div>
+        </TooltipProvider>
+      )}
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
@@ -759,6 +726,16 @@ export function FileDisplay({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </TooltipProvider>
+
+      {/* View File Modal - Always rendered so it works in both view modes */}
+      <ViewFileModal
+        file={viewFile}
+        isOpen={isViewModalOpen}
+        onClose={() => {
+          setIsViewModalOpen(false);
+          setViewFile(null);
+        }}
+      />
+    </>
   );
 }
