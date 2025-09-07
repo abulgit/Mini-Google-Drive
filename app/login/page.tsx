@@ -4,6 +4,7 @@ import { signIn, getSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -31,9 +32,13 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="text-center relative z-10">
           <div className="flex items-center justify-center space-x-3 mb-12">
-            <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center shadow-xl">
-              <div className="w-6 h-6 bg-primary-foreground rounded-lg"></div>
-            </div>
+            <Image
+              src="/logo.png"
+              alt="Mini Drive Logo"
+              width={48}
+              height={48}
+              className="rounded-2xl shadow-xl"
+            />
             <h1 className="text-3xl font-bold text-foreground tracking-tight">
               Mini Drive
             </h1>

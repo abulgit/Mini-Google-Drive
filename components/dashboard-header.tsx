@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Search, Settings, HelpCircle, SlidersHorizontal } from "lucide-react";
 import ThemeToggleButton from "@/components/ui/theme-toggle-button";
+import Image from "next/image";
 
 interface DashboardHeaderProps {
   onUploadClick?: () => void;
@@ -53,9 +54,13 @@ export function DashboardHeader({}: DashboardHeaderProps) {
           <div className="flex items-center gap-6 flex-1">
             {/* Logo */}
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <div className="w-4 h-4 bg-primary-foreground rounded-sm"></div>
-              </div>
+              <Image
+                src="/logo.png"
+                alt="Mini Drive Logo"
+                width={38}
+                height={38}
+                className="rounded-lg"
+              />
               <h1 className="text-xl font-normal text-card-foreground">
                 Mini Drive
               </h1>
