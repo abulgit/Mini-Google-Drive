@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { STORAGE_LIMIT } from "@/types";
+import { STORAGE_LIMIT, validateFileType, ALLOWED_EXTENSIONS } from "@/types";
 import { useCSRFToken } from "@/hooks/useCSRFToken";
 import { cn } from "@/lib/utils";
 import { Upload, Cloud, Plus } from "lucide-react";
@@ -32,6 +32,12 @@ export function FileUpload({ onUploadSuccess, className }: FileUploadProps) {
   };
 
   const validateFile = (file: File): string | null => {
+    // File type validation
+    const fileTypeError = validateFileType(file);
+    if (fileTypeError) {
+      return fileTypeError;
+    }
+
     if (file.size > STORAGE_LIMIT) {
       return `File size (${formatBytes(file.size)}) exceeds maximum limit of ${formatBytes(STORAGE_LIMIT)}`;
     }
@@ -173,6 +179,7 @@ export function FileUpload({ onUploadSuccess, className }: FileUploadProps) {
         <Input
           ref={fileInputRef}
           type="file"
+          accept={ALLOWED_EXTENSIONS.join(",")}
           className="hidden"
           onChange={e => {
             const file = e.target.files?.[0];
@@ -234,6 +241,9 @@ export function FileUpload({ onUploadSuccess, className }: FileUploadProps) {
                 </p>
                 <p className="text-xs text-gray-500">
                   Maximum file size: {formatBytes(STORAGE_LIMIT)}
+                </p>
+                <p className="text-xs text-gray-500">
+                  Supported formats: {ALLOWED_EXTENSIONS.join(", ")}
                 </p>
               </div>
             </div>

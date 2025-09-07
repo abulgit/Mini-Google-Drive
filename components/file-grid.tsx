@@ -510,7 +510,7 @@ export function FileGrid({ files, onFileDeleted }: FileGridProps) {
           <DialogHeader>
             <DialogTitle>Trash File</DialogTitle>
             <DialogDescription>
-              Are you sure you want to trash  &quot;
+              Are you sure you want to trash &quot;
               {fileToDelete?.originalFileName}&quot;? This action cannot be
               undone.
             </DialogDescription>

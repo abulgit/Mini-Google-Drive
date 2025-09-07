@@ -4,7 +4,30 @@ import { authOptions } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/mongodb";
 import { uploadFileToBlob } from "@/lib/azure-storage";
 import { validateCSRFToken, createCSRFError } from "@/lib/csrf-middleware";
-import { STORAGE_LIMIT, type FileDocument, type User } from "@/types";
+import {
+  STORAGE_LIMIT,
+  ALLOWED_EXTENSIONS,
+  ALLOWED_MIME_TYPES,
+  type FileDocument,
+  type User,
+} from "@/types";
+
+// Server-side file type validation
+function validateFileType(file: File): string | null {
+  const fileExtension = file.name
+    .toLowerCase()
+    .substring(file.name.lastIndexOf("."));
+
+  if (!ALLOWED_EXTENSIONS.includes(fileExtension)) {
+    return `File type "${fileExtension}" not allowed. Supported formats: ${ALLOWED_EXTENSIONS.join(", ")}`;
+  }
+
+  if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+    return `File type not recognized. Please ensure the file is not corrupted.`;
+  }
+
+  return null;
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,6 +47,12 @@ export async function POST(request: NextRequest) {
 
     if (!file) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
+    }
+
+    // Validate file type
+    const fileTypeError = validateFileType(file);
+    if (fileTypeError) {
+      return NextResponse.json({ error: fileTypeError }, { status: 400 });
     }
 
     const { db } = await connectToDatabase();

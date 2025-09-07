@@ -42,3 +42,92 @@ export interface StorageUsage {
 
 // Constants
 export const STORAGE_LIMIT = 5 * 1024 * 1024 * 1024; // 5GB in bytes
+
+// Allowed file types
+export const ALLOWED_EXTENSIONS = [
+  ".pdf",
+  ".doc",
+  ".docx",
+  ".txt",
+  ".rtf",
+  ".xls",
+  ".xlsx",
+  ".csv",
+  ".ppt",
+  ".pptx",
+  ".jpg",
+  ".jpeg",
+  ".png",
+  ".gif",
+  ".webp",
+  ".svg",
+  ".mp3",
+  ".wav",
+  ".m4a",
+  ".mp4",
+  ".avi",
+  ".mov",
+  ".mkv",
+  ".zip",
+  ".rar",
+  ".7z",
+];
+
+export const ALLOWED_MIME_TYPES = [
+  // Documents
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "text/plain",
+  "application/rtf",
+
+  // Spreadsheets
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "text/csv",
+
+  // Presentations
+  "application/vnd.ms-powerpoint",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+
+  // Images
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+  "image/svg+xml",
+
+  // Audio
+  "audio/mpeg",
+  "audio/wav",
+  "audio/mp4",
+
+  // Video
+  "video/mp4",
+  "video/x-msvideo",
+  "video/quicktime",
+  "video/x-matroska",
+
+  // Archives
+  "application/zip",
+  "application/x-rar-compressed",
+  "application/x-7z-compressed",
+];
+
+// File type validation function
+export function validateFileType(file: File): string | null {
+  const fileExtension = file.name
+    .toLowerCase()
+    .substring(file.name.lastIndexOf("."));
+
+  if (!ALLOWED_EXTENSIONS.includes(fileExtension)) {
+    return `File type "${fileExtension}" not allowed. Supported formats: ${ALLOWED_EXTENSIONS.join(", ")}`;
+  }
+
+  if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+    return `File type not recognized. Please ensure the file is not corrupted.`;
+  }
+
+  return null;
+}
