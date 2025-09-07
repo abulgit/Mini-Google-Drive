@@ -22,7 +22,7 @@ export default function TrashPage() {
     }
 
     if (!session) {
-      router.push("/login");
+      router.push("/");
       return;
     }
 

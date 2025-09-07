@@ -22,7 +22,7 @@ export default function StarredPage() {
     }
 
     if (!session) {
-      router.push("/login");
+      router.push("/");
       return;
     }
 
