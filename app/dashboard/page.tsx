@@ -7,11 +7,13 @@ import { DashboardHeader } from "@/components/dashboard-header";
 import { Sidebar } from "@/components/sidebar";
 import { FileDisplay } from "@/components/FileDisplay";
 import { UploadModal } from "@/components/upload-modal";
+import { useStorage } from "@/components/storage-context";
 import type { FileDocument } from "@/types";
 
 export default function DashboardPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { refreshStorage } = useStorage();
   const [files, setFiles] = useState<FileDocument[]>([]);
   const [loading, setLoading] = useState(true);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
@@ -43,12 +45,14 @@ export default function DashboardPage() {
     }
   };
 
-  const handleUploadSuccess = () => {
-    fetchFiles(); // Refresh file list and storage usage
+  const handleUploadSuccess = async () => {
+    await fetchFiles(); // Refresh file list
+    await refreshStorage(); // Refresh storage usage
   };
 
-  const handleFileDeleted = () => {
-    fetchFiles(); // Refresh file list and storage usage
+  const handleFileDeleted = async () => {
+    await fetchFiles(); // Refresh file list
+    await refreshStorage(); // Refresh storage usage
   };
 
   const handleNewClick = () => {

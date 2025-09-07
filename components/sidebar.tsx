@@ -23,7 +23,7 @@ import {
   HelpCircle,
 } from "lucide-react";
 import { useEffect } from "react";
-import type { StorageUsage } from "@/types";
+import { useStorage } from "@/components/storage-context";
 
 interface SidebarProps {
   className?: string;
@@ -33,7 +33,7 @@ interface SidebarProps {
 export function Sidebar({ className, onNewClick }: SidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const [storage, setStorage] = useState<StorageUsage | null>(null);
+  const { storage, loading, fetchStorage } = useStorage();
   const [buyStorageModalOpen, setBuyStorageModalOpen] = useState(false);
 
   // Determine active item based on current path
@@ -52,25 +52,14 @@ export function Sidebar({ className, onNewClick }: SidebarProps) {
 
   const [activeItem, setActiveItem] = useState(getActiveItem());
 
+  // Fetch storage on mount if not already loaded
   useEffect(() => {
-    fetchStorageUsage();
-  }, []);
+    fetchStorage();
+  }, [fetchStorage]);
 
   useEffect(() => {
     setActiveItem(getActiveItem());
   }, [pathname, getActiveItem]);
-
-  const fetchStorageUsage = async () => {
-    try {
-      const response = await fetch("/api/storage");
-      if (response.ok) {
-        const data = await response.json();
-        setStorage(data.storage);
-      }
-    } catch (error) {
-      console.error("Failed to fetch storage usage:", error);
-    }
-  };
 
   const formatBytes = (bytes: number) => {
     if (bytes === 0) {
@@ -189,7 +178,7 @@ export function Sidebar({ className, onNewClick }: SidebarProps) {
               Storage
             </div>
 
-            {storage ? (
+            {storage && !loading ? (
               <div className="space-y-3">
                 <div className="space-y-2">
                   <Progress
