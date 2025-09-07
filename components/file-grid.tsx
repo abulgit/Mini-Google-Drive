@@ -504,13 +504,13 @@ export function FileGrid({ files, onFileDeleted }: FileGridProps) {
         </div>
       </div>
 
-      {/* Delete Confirmation Dialog */}
+      {/* Trash Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete File</DialogTitle>
+            <DialogTitle>Trash File</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete &quot;
+              Are you sure you want to trash  &quot;
               {fileToDelete?.originalFileName}&quot;? This action cannot be
               undone.
             </DialogDescription>
@@ -528,8 +528,8 @@ export function FileGrid({ files, onFileDeleted }: FileGridProps) {
               disabled={deletingFiles.has(fileToDelete?._id?.toString() || "")}
             >
               {deletingFiles.has(fileToDelete?._id?.toString() || "")
-                ? "Deleting..."
-                : "Delete"}
+                ? "Moving to trash..."
+                : "Move to trash"}
             </Button>
           </DialogFooter>
         </DialogContent>
