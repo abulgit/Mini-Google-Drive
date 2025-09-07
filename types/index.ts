@@ -22,6 +22,7 @@ export interface FileDocument {
   fileType: string; // MIME type
   blobUrl: string; // Azure Blob Storage URL
   uploadedAt: Date;
+  starred?: boolean; // Whether the file is starred by the user
 }
 
 // File upload response type

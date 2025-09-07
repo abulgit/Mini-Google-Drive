@@ -93,6 +93,33 @@ export function FileList({ files, onFileDeleted }: FileListProps) {
     }
   };
 
+  const handleStarToggle = async (fileId: string, currentStarred: boolean) => {
+    if (!csrfToken) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/files/${fileId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": csrfToken,
+        },
+        body: JSON.stringify({ starred: !currentStarred }),
+      });
+
+      if (response.ok) {
+        toast.success(!currentStarred ? "File starred" : "File unstarred");
+        onFileDeleted(); // Refresh the file list
+      } else {
+        toast.error("Failed to update star status");
+      }
+    } catch (error) {
+      console.error("Star toggle failed:", error);
+      toast.error("Failed to update star status");
+    }
+  };
+
   const handleDelete = async (fileId: string) => {
     const file = files.find(f => f._id!.toString() === fileId);
     if (file) {
@@ -205,6 +232,18 @@ export function FileList({ files, onFileDeleted }: FileListProps) {
                         onClick={() => handleDownload(file._id!.toString())}
                       >
                         Download
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          handleStarToggle(
+                            file._id!.toString(),
+                            file.starred || false
+                          )
+                        }
+                      >
+                        {file.starred ? "⭐" : "☆"}
                       </Button>
                       <Button
                         variant="outline"

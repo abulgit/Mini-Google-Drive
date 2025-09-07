@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -30,13 +31,34 @@ interface SidebarProps {
 }
 
 export function Sidebar({ className, onNewClick }: SidebarProps) {
+  const router = useRouter();
+  const pathname = usePathname();
   const [storage, setStorage] = useState<StorageUsage | null>(null);
-  const [activeItem, setActiveItem] = useState("my-drive");
   const [buyStorageModalOpen, setBuyStorageModalOpen] = useState(false);
+
+  // Determine active item based on current path
+  const getActiveItem = useCallback(() => {
+    if (pathname === "/dashboard/starred") {
+      return "starred";
+    }
+    if (pathname === "/dashboard/recent") {
+      return "recent";
+    }
+    if (pathname === "/dashboard/trash") {
+      return "trash";
+    }
+    return "my-drive";
+  }, [pathname]);
+
+  const [activeItem, setActiveItem] = useState(getActiveItem());
 
   useEffect(() => {
     fetchStorageUsage();
   }, []);
+
+  useEffect(() => {
+    setActiveItem(getActiveItem());
+  }, [pathname, getActiveItem]);
 
   const fetchStorageUsage = async () => {
     try {
@@ -60,34 +82,48 @@ export function Sidebar({ className, onNewClick }: SidebarProps) {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
+  const handleNavigation = (itemId: string) => {
+    setActiveItem(itemId);
+    switch (itemId) {
+      case "my-drive":
+        router.push("/dashboard");
+        break;
+      case "starred":
+        router.push("/dashboard/starred");
+        break;
+      case "recent":
+        // Future implementation
+        break;
+      case "trash":
+        // Future implementation
+        break;
+    }
+  };
+
   const navigationItems = [
     {
       id: "my-drive",
       label: "My Drive",
       icon: HardDrive,
       count: null,
-      active: true,
     },
     {
       id: "recent",
       label: "Recent",
       icon: Clock,
       count: null,
-      active: false,
     },
     {
       id: "starred",
       label: "Starred",
       icon: Star,
       count: null,
-      active: false,
     },
     {
       id: "trash",
       label: "Trash",
       icon: Trash2,
       count: null,
-      active: false,
     },
   ];
 
@@ -122,7 +158,7 @@ export function Sidebar({ className, onNewClick }: SidebarProps) {
             return (
               <button
                 key={item.id}
-                onClick={() => setActiveItem(item.id)}
+                onClick={() => handleNavigation(item.id)}
                 className={cn(
                   "w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors",
                   isActive
