@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { SigninModal } from "@/components/signin-modal";
+import ThemeToggleButton from "@/components/ui/theme-toggle-button";
 
 export default function Home() {
   const { data: session, status } = useSession();
@@ -59,13 +60,16 @@ export default function Home() {
                 Mini Drive
               </h1>
             </div>
-            <Button
-              size="sm"
-              onClick={handleGetStarted}
-              className="border border-border/50 text-foreground hover:bg-muted/50"
-            >
-              Sign in
-            </Button>
+            <div className="flex items-center gap-2">
+              <ThemeToggleButton variant="circle" start="center" />
+              <Button
+                size="sm"
+                onClick={handleGetStarted}
+                className="border border-border/50 text-foreground hover:bg-muted/50"
+              >
+                Sign in
+              </Button>
+            </div>
           </div>
         </div>
       </header>
