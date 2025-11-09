@@ -135,6 +135,7 @@ export async function getBlobProperties(blobPath: string): Promise<{
   size: number;
   contentType: string;
   lastModified: Date;
+  url: string;
 } | null> {
   try {
     const containerClient = await getContainerClient();
@@ -145,6 +146,7 @@ export async function getBlobProperties(blobPath: string): Promise<{
       size: properties.contentLength || 0,
       contentType: properties.contentType || "application/octet-stream",
       lastModified: properties.lastModified || new Date(),
+      url: blockBlobClient.url,
     };
   } catch (error) {
     console.error("Error getting blob properties:", error);

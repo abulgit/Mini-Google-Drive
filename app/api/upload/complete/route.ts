@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
       originalFileName,
       fileSize: blobProperties.size,
       fileType: blobProperties.contentType,
-      blobUrl: `https://${process.env.AZURE_STORAGE_ACCOUNT_NAME || "storage"}.blob.core.windows.net/${process.env.AZURE_STORAGE_CONTAINER_NAME || "user-files"}/${blobPath}`,
+      blobUrl: blobProperties.url,
       uploadedAt: new Date(),
     };
 
