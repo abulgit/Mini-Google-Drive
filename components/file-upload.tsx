@@ -74,34 +74,86 @@ export function FileUpload({ onUploadSuccess, className }: FileUploadProps) {
     setUploading(true);
     setUploadProgress(0);
 
+    let blobPath = "";
+
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      // Simulate progress for better UX
-      const progressInterval = setInterval(() => {
-        setUploadProgress(prev => Math.min(prev + 10, 90));
-      }, 200);
-
-      const response = await fetch("/api/upload", {
+      const sasResponse = await fetch("/api/upload/sas", {
         method: "POST",
         headers: {
+          "Content-Type": "application/json",
           "X-CSRF-Token": csrfToken,
         },
-        body: formData,
+        body: JSON.stringify({
+          fileName: file.name,
+          fileSize: file.size,
+          fileType: file.type,
+        }),
       });
 
-      clearInterval(progressInterval);
-      setUploadProgress(100);
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Upload failed");
+      if (!sasResponse.ok) {
+        const errorData = await sasResponse.json();
+        throw new Error(errorData.error || "Failed to get upload URL");
       }
 
+      const sasData = await sasResponse.json();
+      const { uploadUrl } = sasData;
+      blobPath = sasData.blobPath;
+
+      await new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+
+        xhr.upload.addEventListener("progress", e => {
+          if (e.lengthComputable) {
+            const percentComplete = Math.round((e.loaded / e.total) * 95);
+            setUploadProgress(percentComplete);
+          }
+        });
+
+        xhr.addEventListener("load", () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            setUploadProgress(95);
+            resolve();
+          } else {
+            reject(new Error(`Upload failed with status: ${xhr.status}`));
+          }
+        });
+
+        xhr.addEventListener("error", () => {
+          reject(new Error("Network error during upload"));
+        });
+
+        xhr.addEventListener("abort", () => {
+          reject(new Error("Upload cancelled"));
+        });
+
+        xhr.open("PUT", uploadUrl, true);
+        xhr.setRequestHeader("x-ms-blob-type", "BlockBlob");
+        xhr.setRequestHeader("Content-Type", file.type);
+        xhr.send(file);
+      });
+
+      setUploadProgress(98);
+
+      const completeResponse = await fetch("/api/upload/complete", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": csrfToken,
+        },
+        body: JSON.stringify({
+          blobPath,
+          originalFileName: file.name,
+        }),
+      });
+
+      if (!completeResponse.ok) {
+        const errorData = await completeResponse.json();
+        throw new Error(errorData.error || "Failed to complete upload");
+      }
+
+      setUploadProgress(100);
       toast.success("File uploaded successfully!");
-      // Show success state briefly
+
       setTimeout(() => {
         onUploadSuccess();
         setUploadProgress(0);

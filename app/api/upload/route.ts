@@ -12,6 +12,11 @@ import {
   type User,
 } from "@/types";
 
+// LEGACY UPLOAD ENDPOINT - Kept for backward compatibility
+// This endpoint proxies file uploads through the server and is limited by Vercel's 4.5MB payload limit
+// For files >4.5MB, the new presigned URL flow is used (/api/upload/sas + /api/upload/complete)
+// This endpoint can be used as a fallback for small files or in environments without SAS token support
+
 // Server-side file type validation
 function validateFileType(file: File): string | null {
   const fileExtension = file.name
