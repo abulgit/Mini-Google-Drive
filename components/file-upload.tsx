@@ -18,6 +18,8 @@ export function FileUpload({ onUploadSuccess, className }: FileUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadSpeed, setUploadSpeed] = useState<string>("");
+  const [uploadETA, setUploadETA] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { csrfToken, loading: csrfLoading } = useCSRFToken();
 
@@ -29,6 +31,28 @@ export function FileUpload({ onUploadSuccess, className }: FileUploadProps) {
     const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+  };
+
+  const formatSpeed = (bytesPerSecond: number) => {
+    if (bytesPerSecond === 0) {
+      return "0 KB/s";
+    }
+    const k = 1024;
+    const sizes = ["B/s", "KB/s", "MB/s", "GB/s"];
+    const i = Math.floor(Math.log(bytesPerSecond) / Math.log(k));
+    return (
+      parseFloat((bytesPerSecond / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]
+    );
+  };
+
+  const formatTime = (seconds: number) => {
+    if (seconds < 60) {
+      return `${Math.round(seconds)}s`;
+    }
+    if (seconds < 3600) {
+      return `${Math.floor(seconds / 60)}m ${Math.round(seconds % 60)}s`;
+    }
+    return `${Math.floor(seconds / 3600)}h ${Math.floor((seconds % 3600) / 60)}m`;
   };
 
   const validateFile = (file: File): string | null => {
@@ -101,17 +125,46 @@ export function FileUpload({ onUploadSuccess, className }: FileUploadProps) {
 
       await new Promise<void>((resolve, reject) => {
         const xhr = new XMLHttpRequest();
+        const startTime = Date.now();
+        let lastLoaded = 0;
+        let lastTime = startTime;
 
         xhr.upload.addEventListener("progress", e => {
           if (e.lengthComputable) {
             const percentComplete = Math.round((e.loaded / e.total) * 95);
             setUploadProgress(percentComplete);
+
+            const currentTime = Date.now();
+            const elapsedTime = (currentTime - startTime) / 1000;
+            const timeSinceLastUpdate = (currentTime - lastTime) / 1000;
+
+            if (timeSinceLastUpdate > 0.5) {
+              const bytesSinceLastUpdate = e.loaded - lastLoaded;
+              const currentSpeed = bytesSinceLastUpdate / timeSinceLastUpdate;
+
+              const averageSpeed = e.loaded / elapsedTime;
+              const remainingBytes = e.total - e.loaded;
+              const estimatedTimeRemaining = remainingBytes / averageSpeed;
+
+              setUploadSpeed(formatSpeed(currentSpeed));
+              if (
+                estimatedTimeRemaining > 0 &&
+                estimatedTimeRemaining < 86400
+              ) {
+                setUploadETA(formatTime(estimatedTimeRemaining));
+              }
+
+              lastLoaded = e.loaded;
+              lastTime = currentTime;
+            }
           }
         });
 
         xhr.addEventListener("load", () => {
           if (xhr.status >= 200 && xhr.status < 300) {
             setUploadProgress(95);
+            setUploadSpeed("");
+            setUploadETA("");
             resolve();
           } else {
             reject(new Error(`Upload failed with status: ${xhr.status}`));
@@ -161,6 +214,8 @@ export function FileUpload({ onUploadSuccess, className }: FileUploadProps) {
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Upload failed");
       setUploadProgress(0);
+      setUploadSpeed("");
+      setUploadETA("");
     } finally {
       setTimeout(() => {
         setUploading(false);
@@ -260,6 +315,12 @@ export function FileUpload({ onUploadSuccess, className }: FileUploadProps) {
                 <p className="text-sm text-gray-600">
                   {uploadProgress}% complete
                 </p>
+                {(uploadSpeed || uploadETA) && (
+                  <div className="flex items-center justify-center gap-3 text-xs text-gray-500">
+                    {uploadSpeed && <span>⚡ {uploadSpeed}</span>}
+                    {uploadETA && <span>⏱ {uploadETA} remaining</span>}
+                  </div>
+                )}
               </div>
             </div>
           ) : (
