@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { formatBytes } from "@/lib/utils";
 import type { FileDocument } from "@/types";
 
 interface ViewFileModalProps {
@@ -128,16 +129,6 @@ export function ViewFileModal({ file, isOpen, onClose }: ViewFileModalProps) {
         <p className="text-sm text-muted-foreground mt-2">{file.fileType}</p>
       </div>
     );
-  };
-
-  const formatBytes = (bytes: number) => {
-    if (bytes === 0) {
-      return "0 Bytes";
-    }
-    const k = 1024;
-    const sizes = ["Bytes", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
   return (

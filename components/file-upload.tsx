@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { STORAGE_LIMIT, validateFileType, ALLOWED_EXTENSIONS } from "@/types";
 import { useCSRFToken } from "@/hooks/useCSRFToken";
-import { cn } from "@/lib/utils";
+import { cn, formatBytes } from "@/lib/utils";
 import { Upload, Cloud, Plus } from "lucide-react";
 
 interface FileUploadProps {
@@ -20,16 +20,6 @@ export function FileUpload({ onUploadSuccess, className }: FileUploadProps) {
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { csrfToken, loading: csrfLoading } = useCSRFToken();
-
-  const formatBytes = (bytes: number) => {
-    if (bytes === 0) {
-      return "0 Bytes";
-    }
-    const k = 1024;
-    const sizes = ["Bytes", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-  };
 
   const validateFile = (file: File): string | null => {
     // File type validation

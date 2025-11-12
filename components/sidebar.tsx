@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
+import { cn, formatBytes } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -60,16 +60,6 @@ export function Sidebar({ className, onNewClick }: SidebarProps) {
   useEffect(() => {
     setActiveItem(getActiveItem());
   }, [pathname, getActiveItem]);
-
-  const formatBytes = (bytes: number) => {
-    if (bytes === 0) {
-      return "0 Bytes";
-    }
-    const k = 1024;
-    const sizes = ["Bytes", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-  };
 
   const handleNavigation = (itemId: string) => {
     setActiveItem(itemId);

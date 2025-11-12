@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Grid3X3, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { formatBytes, formatDate } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -75,25 +76,6 @@ export function FileDisplay({
     viewMode === "list" ? "secondary" : "ghost";
   const getGridButtonVariant = () =>
     viewMode === "grid" ? "secondary" : "ghost";
-
-  const formatBytes = (bytes: number) => {
-    if (bytes === 0) {
-      return "0 Bytes";
-    }
-    const k = 1024;
-    const sizes = ["Bytes", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-  };
-
-  const formatDate = (date: Date | string) => {
-    const d = new Date(date);
-    return d.toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
 
   const getFileIcon = (fileType: string) => {
     if (fileType.startsWith("image/")) {
