@@ -15,6 +15,7 @@ export const ERROR_MESSAGES = {
   DELETE_FAILED: "Failed to delete file",
   RESTORE_FAILED: "Failed to restore file",
   STAR_FAILED: "Failed to update star status",
+  RENAME_FAILED: "Failed to rename file",
 } as const;
 
 export const SUCCESS_MESSAGES = {
@@ -24,6 +25,7 @@ export const SUCCESS_MESSAGES = {
   FILE_STARRED: "File starred",
   FILE_UNSTARRED: "File unstarred",
   FILE_PERMANENTLY_DELETED: "File permanently deleted",
+  FILE_RENAMED: "File renamed successfully",
 } as const;
 
 export const DATABASE_NAME = "simpledrive";

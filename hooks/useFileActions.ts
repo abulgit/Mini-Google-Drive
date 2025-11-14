@@ -12,10 +12,13 @@ export function useFileActions(
   const [processingFiles, setProcessingFiles] = useState<Set<string>>(
     new Set()
   );
+  const [renamingFiles, setRenamingFiles] = useState<Set<string>>(new Set());
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [permanentDeleteDialogOpen, setPermanentDeleteDialogOpen] =
     useState(false);
+  const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [fileToDelete, setFileToDelete] = useState<FileDocument | null>(null);
+  const [fileToRename, setFileToRename] = useState<FileDocument | null>(null);
   const { csrfToken } = useCSRFToken();
 
   const handleDownload = async (fileId: string) => {
@@ -179,19 +182,69 @@ export function useFileActions(
     }
   };
 
+  const handleRenameClick = (fileId: string, file: FileDocument) => {
+    setFileToRename(file);
+    setRenameDialogOpen(true);
+  };
+
+  const confirmRename = async (newName: string) => {
+    if (!fileToRename || !csrfToken) {
+      return;
+    }
+
+    const fileId = fileToRename._id!.toString();
+    setRenameDialogOpen(false);
+    setRenamingFiles(prev => new Set(prev).add(fileId));
+
+    try {
+      const response = await fetch(`/api/files/${fileId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": csrfToken,
+        },
+        body: JSON.stringify({ originalFileName: newName }),
+      });
+
+      if (response.ok) {
+        toast.success(SUCCESS_MESSAGES.FILE_RENAMED);
+        onFileUpdated?.();
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.error || ERROR_MESSAGES.RENAME_FAILED);
+      }
+    } catch (error) {
+      console.error("Rename failed:", error);
+      toast.error(ERROR_MESSAGES.RENAME_FAILED);
+    } finally {
+      setRenamingFiles(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(fileId);
+        return newSet;
+      });
+      setFileToRename(null);
+    }
+  };
+
   return {
     deletingFiles,
     processingFiles,
+    renamingFiles,
     deleteDialogOpen,
     permanentDeleteDialogOpen,
+    renameDialogOpen,
     fileToDelete,
+    fileToRename,
     setDeleteDialogOpen,
     setPermanentDeleteDialogOpen,
+    setRenameDialogOpen,
     handleDownload,
     handleStarToggle,
     handleRestore,
     handleDeleteClick,
+    handleRenameClick,
     confirmDelete,
     confirmPermanentDelete,
+    confirmRename,
   };
 }

@@ -7,6 +7,7 @@ import { FileEmptyState } from "@/components/FileEmptyState";
 import { FileListView } from "@/components/FileListView";
 import { FileGridView } from "@/components/FileGridView";
 import { FileDeleteDialog } from "@/components/FileDeleteDialog";
+import { FileRenameDialog } from "@/components/FileRenameDialog";
 import { useFileActions } from "@/hooks/useFileActions";
 import type { FileDocument } from "@/types";
 
@@ -30,17 +31,23 @@ export function FileDisplay({
   const {
     deletingFiles,
     processingFiles,
+    renamingFiles,
     deleteDialogOpen,
     permanentDeleteDialogOpen,
+    renameDialogOpen,
     fileToDelete,
+    fileToRename,
     setDeleteDialogOpen,
     setPermanentDeleteDialogOpen,
+    setRenameDialogOpen,
     handleDownload,
     handleStarToggle,
     handleRestore,
     handleDeleteClick,
+    handleRenameClick,
     confirmDelete,
     confirmPermanentDelete,
+    confirmRename,
   } = useFileActions(onFileDeleted, onFileUpdated);
 
   const handleView = (fileId: string) => {
@@ -58,6 +65,13 @@ export function FileDisplay({
     }
   };
 
+  const handleRename = (fileId: string) => {
+    const file = files.find(f => f._id!.toString() === fileId);
+    if (file) {
+      handleRenameClick(fileId, file);
+    }
+  };
+
   if (files.length === 0) {
     return <FileEmptyState mode={mode} />;
   }
@@ -72,6 +86,7 @@ export function FileDisplay({
     onFileClick: handleView,
     onDownload: handleDownload,
     onStarToggle: handleStarToggle,
+    onRename: handleRename,
     onDelete: handleDelete,
     onRestore: handleRestore,
   };
@@ -102,6 +117,14 @@ export function FileDisplay({
         isDeleting={processingFiles.has(fileToDelete?._id?.toString() || "")}
         onClose={() => setPermanentDeleteDialogOpen(false)}
         onConfirm={confirmPermanentDelete}
+      />
+
+      <FileRenameDialog
+        file={fileToRename}
+        isOpen={renameDialogOpen}
+        isRenaming={renamingFiles.has(fileToRename?._id?.toString() || "")}
+        onClose={() => setRenameDialogOpen(false)}
+        onConfirm={confirmRename}
       />
 
       <ViewFileModal

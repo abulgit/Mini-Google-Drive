@@ -24,6 +24,7 @@ interface FileGridViewProps {
   onFileClick: (fileId: string) => void;
   onDownload: (fileId: string) => void;
   onStarToggle: (fileId: string, currentStarred: boolean) => void;
+  onRename: (fileId: string) => void;
   onDelete: (fileId: string) => void;
   onRestore: (fileId: string) => void;
 }
@@ -38,6 +39,7 @@ export function FileGridView({
   onFileClick,
   onDownload,
   onStarToggle,
+  onRename,
   onDelete,
   onRestore,
 }: FileGridViewProps) {
@@ -85,6 +87,7 @@ export function FileGridView({
                     isProcessing={isProcessing}
                     onDownload={onDownload}
                     onStarToggle={onStarToggle}
+                    onRename={onRename}
                     onDelete={onDelete}
                     onRestore={onRestore}
                     className="w-6 h-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"

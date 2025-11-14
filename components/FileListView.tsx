@@ -19,6 +19,7 @@ interface FileListViewProps {
   onFileClick: (fileId: string) => void;
   onDownload: (fileId: string) => void;
   onStarToggle: (fileId: string, currentStarred: boolean) => void;
+  onRename: (fileId: string) => void;
   onDelete: (fileId: string) => void;
   onRestore: (fileId: string) => void;
 }
@@ -33,6 +34,7 @@ export function FileListView({
   onFileClick,
   onDownload,
   onStarToggle,
+  onRename,
   onDelete,
   onRestore,
 }: FileListViewProps) {
@@ -108,6 +110,7 @@ export function FileListView({
                   isProcessing={isProcessing}
                   onDownload={onDownload}
                   onStarToggle={onStarToggle}
+                  onRename={onRename}
                   onDelete={onDelete}
                   onRestore={onRestore}
                   className="w-8 h-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"

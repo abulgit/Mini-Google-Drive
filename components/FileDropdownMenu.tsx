@@ -6,7 +6,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { MoreVertical, Download, Trash2, Star, RotateCcw } from "lucide-react";
+import {
+  MoreVertical,
+  Download,
+  Trash2,
+  Star,
+  RotateCcw,
+  Edit,
+} from "lucide-react";
 
 interface FileDropdownMenuProps {
   fileId: string;
@@ -16,6 +23,7 @@ interface FileDropdownMenuProps {
   isProcessing: boolean;
   onDownload: (fileId: string) => void;
   onStarToggle?: (fileId: string, currentStarred: boolean) => void;
+  onRename?: (fileId: string) => void;
   onDelete: (fileId: string) => void;
   onRestore?: (fileId: string) => void;
   className?: string;
@@ -29,6 +37,7 @@ export function FileDropdownMenu({
   isProcessing,
   onDownload,
   onStarToggle,
+  onRename,
   onDelete,
   onRestore,
   className,
@@ -52,6 +61,10 @@ export function FileDropdownMenu({
 
         {mode === "files" ? (
           <>
+            <DropdownMenuItem onClick={() => onRename?.(fileId)}>
+              <Edit className="w-4 h-4 mr-2" />
+              Rename
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onStarToggle?.(fileId, isStarred)}>
               <Star
                 className={`w-4 h-4 mr-2 ${isStarred ? "fill-current" : ""}`}
