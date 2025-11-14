@@ -1,24 +1,24 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { NextRequest } from "next/server";
 import { generateCSRFToken } from "@/lib/csrf";
+import {
+  getAuthenticatedUser,
+  createErrorResponse,
+  createSuccessResponse,
+} from "@/lib/api-helpers";
+import { ERROR_MESSAGES } from "@/lib/constants";
 
-export async function GET(_request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const { error } = await getAuthenticatedUser(request);
+    if (error) {
+      return error;
     }
 
     const csrfToken = generateCSRFToken();
 
-    return NextResponse.json({ csrfToken });
+    return createSuccessResponse({ csrfToken });
   } catch (error) {
     console.error("CSRF token generation error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return createErrorResponse(ERROR_MESSAGES.INTERNAL_ERROR, 500);
   }
 }

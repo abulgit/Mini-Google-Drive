@@ -1,40 +1,39 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { NextRequest } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
+import {
+  getAuthenticatedUser,
+  createErrorResponse,
+  createSuccessResponse,
+} from "@/lib/api-helpers";
+import { COLLECTIONS, ERROR_MESSAGES } from "@/lib/constants";
 import { STORAGE_LIMIT, type User, type StorageUsage } from "@/types";
 
-export async function GET(_request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const { error, user } = await getAuthenticatedUser(request);
+    if (error) {
+      return error;
     }
 
     const { db } = await connectToDatabase();
 
-    // Get user's storage usage
-    const user = await db.collection<User>("users").findOne({
-      userId: session.user.id,
+    const userData = await db.collection<User>(COLLECTIONS.USERS).findOne({
+      userId: user!.id,
     });
 
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    if (!userData) {
+      return createErrorResponse("User not found", 404);
     }
 
     const storageUsage: StorageUsage = {
-      used: user.totalStorageUsed,
+      used: userData.totalStorageUsed,
       total: STORAGE_LIMIT,
-      percentage: Math.round((user.totalStorageUsed / STORAGE_LIMIT) * 100),
+      percentage: Math.round((userData.totalStorageUsed / STORAGE_LIMIT) * 100),
     };
 
-    return NextResponse.json({ storage: storageUsage });
+    return createSuccessResponse({ storage: storageUsage });
   } catch (error) {
     console.error("Storage usage error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return createErrorResponse(ERROR_MESSAGES.INTERNAL_ERROR, 500);
   }
 }

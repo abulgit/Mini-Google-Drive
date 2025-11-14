@@ -1,8 +1,15 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { NextRequest } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { validateCSRFToken, createCSRFError } from "@/lib/csrf-middleware";
+import {
+  getAuthenticatedUser,
+  validateRequest,
+  createErrorResponse,
+  createSuccessResponse,
+  parseRequestBody,
+} from "@/lib/api-helpers";
+import { fileUpdateSchema, fileIdSchema } from "@/lib/validations";
+import { COLLECTIONS, ERROR_MESSAGES } from "@/lib/constants";
 import { ObjectId } from "mongodb";
 import type { FileDocument } from "@/types";
 
@@ -11,51 +18,54 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Validate CSRF token first
     if (!validateCSRFToken(request)) {
       return createCSRFError();
     }
 
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const { error, user } = await getAuthenticatedUser(request);
+    if (error) {
+      return error;
     }
 
     const { id } = await params;
-    const { starred } = await request.json();
 
-    if (typeof starred !== "boolean") {
-      return NextResponse.json(
-        { error: "Invalid starred value" },
-        { status: 400 }
-      );
+    const idValidation = await validateRequest(fileIdSchema, { id });
+    if (!idValidation.success) {
+      return createErrorResponse(idValidation.error, 400);
+    }
+
+    const body = await parseRequestBody(request);
+    if (!body) {
+      return createErrorResponse(ERROR_MESSAGES.INVALID_REQUEST, 400);
+    }
+
+    const validation = await validateRequest(fileUpdateSchema, body);
+    if (!validation.success) {
+      return createErrorResponse(validation.error, 400);
     }
 
     const { db } = await connectToDatabase();
 
-    // Update the file's starred status
-    const result = await db.collection<FileDocument>("files").updateOne(
-      {
-        _id: new ObjectId(id),
-        userId: session.user.id,
-      },
-      {
-        $set: { starred },
-      }
-    );
+    const result = await db
+      .collection<FileDocument>(COLLECTIONS.FILES)
+      .updateOne(
+        {
+          _id: new ObjectId(id),
+          userId: user!.id,
+        },
+        {
+          $set: validation.data,
+        }
+      );
 
     if (result.matchedCount === 0) {
-      return NextResponse.json({ error: "File not found" }, { status: 404 });
+      return createErrorResponse(ERROR_MESSAGES.FILE_NOT_FOUND, 404);
     }
 
-    return NextResponse.json({ success: true, starred });
+    return createSuccessResponse({ success: true, ...validation.data });
   } catch (error) {
-    console.error("Star toggle error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    console.error("File update error:", error);
+    return createErrorResponse(ERROR_MESSAGES.INTERNAL_ERROR, 500);
   }
 }
 
@@ -64,45 +74,47 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Validate CSRF token first
     if (!validateCSRFToken(request)) {
       return createCSRFError();
     }
 
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const { error, user } = await getAuthenticatedUser(request);
+    if (error) {
+      return error;
     }
 
     const { id } = await params;
+
+    const idValidation = await validateRequest(fileIdSchema, { id });
+    if (!idValidation.success) {
+      return createErrorResponse(idValidation.error, 400);
+    }
+
     const { db } = await connectToDatabase();
 
-    // Find the file and verify ownership
-    const file = await db.collection<FileDocument>("files").findOne({
+    const file = await db.collection<FileDocument>(COLLECTIONS.FILES).findOne({
       _id: new ObjectId(id),
-      userId: session.user.id,
-      deletedAt: { $exists: false }, // Only allow soft delete of non-deleted files
+      userId: user!.id,
+      deletedAt: { $exists: false },
     });
 
     if (!file) {
-      return NextResponse.json({ error: "File not found" }, { status: 404 });
+      return createErrorResponse(ERROR_MESSAGES.FILE_NOT_FOUND, 404);
     }
 
-    // Soft delete: Set deletedAt timestamp
-    await db.collection<FileDocument>("files").updateOne(
+    await db.collection<FileDocument>(COLLECTIONS.FILES).updateOne(
       { _id: new ObjectId(id) },
       {
         $set: { deletedAt: new Date() },
       }
     );
 
-    return NextResponse.json({ success: true, message: "File moved to trash" });
+    return createSuccessResponse({
+      success: true,
+      message: "File moved to trash",
+    });
   } catch (error) {
     console.error("Soft delete error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return createErrorResponse(ERROR_MESSAGES.INTERNAL_ERROR, 500);
   }
 }

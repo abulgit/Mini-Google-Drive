@@ -1,9 +1,15 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { NextRequest } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { deleteFileFromBlob } from "@/lib/azure-storage";
 import { validateCSRFToken, createCSRFError } from "@/lib/csrf-middleware";
+import {
+  getAuthenticatedUser,
+  validateRequest,
+  createErrorResponse,
+  createSuccessResponse,
+} from "@/lib/api-helpers";
+import { fileIdSchema } from "@/lib/validations";
+import { COLLECTIONS, ERROR_MESSAGES } from "@/lib/constants";
 import { ObjectId } from "mongodb";
 import type { FileDocument, User } from "@/types";
 
@@ -12,60 +18,54 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Validate CSRF token first
     if (!validateCSRFToken(request)) {
       return createCSRFError();
     }
 
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const { error, user } = await getAuthenticatedUser(request);
+    if (error) {
+      return error;
     }
 
     const { id } = await params;
+
+    const idValidation = await validateRequest(fileIdSchema, { id });
+    if (!idValidation.success) {
+      return createErrorResponse(idValidation.error, 400);
+    }
+
     const { db } = await connectToDatabase();
 
-    // Find the deleted file and verify ownership
-    const file = await db.collection<FileDocument>("files").findOne({
+    const file = await db.collection<FileDocument>(COLLECTIONS.FILES).findOne({
       _id: new ObjectId(id),
-      userId: session.user.id,
-      deletedAt: { $exists: true }, // Only permanently delete files in trash
+      userId: user!.id,
+      deletedAt: { $exists: true },
     });
 
     if (!file) {
-      return NextResponse.json(
-        { error: "File not found in trash" },
-        { status: 404 }
-      );
+      return createErrorResponse("File not found in trash", 404);
     }
 
-    // Delete from Azure Blob Storage
-    await deleteFileFromBlob(session.user.id, file.fileName);
+    await deleteFileFromBlob(user!.id, file.fileName);
 
-    // Delete from MongoDB permanently
-    await db.collection<FileDocument>("files").deleteOne({
+    await db.collection<FileDocument>(COLLECTIONS.FILES).deleteOne({
       _id: new ObjectId(id),
     });
 
-    // Update user's total storage used
-    await db.collection<User>("users").updateOne(
-      { userId: session.user.id },
+    await db.collection<User>(COLLECTIONS.USERS).updateOne(
+      { userId: user!.id },
       {
         $inc: { totalStorageUsed: -file.fileSize },
         $set: { updatedAt: new Date() },
       }
     );
 
-    return NextResponse.json({
+    return createSuccessResponse({
       success: true,
       message: "File permanently deleted",
     });
   } catch (error) {
     console.error("Permanent delete error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return createErrorResponse(ERROR_MESSAGES.DELETE_FAILED, 500);
   }
 }

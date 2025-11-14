@@ -1,9 +1,16 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { NextRequest } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { validateCSRFToken, createCSRFError } from "@/lib/csrf-middleware";
 import { generatePresignedUploadUrl } from "@/lib/azure-storage";
+import {
+  getAuthenticatedUser,
+  validateRequest,
+  createErrorResponse,
+  createSuccessResponse,
+  parseRequestBody,
+} from "@/lib/api-helpers";
+import { COLLECTIONS, ERROR_MESSAGES } from "@/lib/constants";
+import { z } from "zod";
 import {
   STORAGE_LIMIT,
   ALLOWED_EXTENSIONS,
@@ -11,48 +18,41 @@ import {
   type User,
 } from "@/types";
 
-interface PresignedUrlRequest {
-  fileName: string;
-  fileSize: number;
-  fileType: string;
-}
-
-function validateFileInput(
-  fileName: string,
-  fileSize: number,
-  fileType: string
-): string | null {
-  if (!fileName || fileName.trim() === "") {
-    return "File name is required";
-  }
-
-  const fileExtension = fileName
-    .toLowerCase()
-    .substring(fileName.lastIndexOf("."));
-
-  if (!ALLOWED_EXTENSIONS.includes(fileExtension)) {
-    return `File type "${fileExtension}" not allowed. Supported formats: ${ALLOWED_EXTENSIONS.join(", ")}`;
-  }
-
-  if (!ALLOWED_MIME_TYPES.includes(fileType)) {
-    return `File MIME type not allowed`;
-  }
-
-  if (fileSize <= 0) {
-    return "Invalid file size";
-  }
-
-  if (fileSize > STORAGE_LIMIT) {
-    return `File size exceeds maximum limit of ${STORAGE_LIMIT / (1024 * 1024 * 1024)}GB`;
-  }
-
-  const dangerousChars = /[<>:"/\\|?*]/;
-  if (dangerousChars.test(fileName)) {
-    return "File name contains invalid characters";
-  }
-
-  return null;
-}
+const presignedUrlSchema = z
+  .object({
+    fileName: z
+      .string()
+      .min(1, "File name is required")
+      .max(255, "File name too long"),
+    fileSize: z
+      .number()
+      .positive("File size must be positive")
+      .max(
+        STORAGE_LIMIT,
+        `File size exceeds maximum limit of ${STORAGE_LIMIT / (1024 * 1024 * 1024)}GB`
+      ),
+    fileType: z.string().min(1, "File type is required"),
+  })
+  .refine(
+    data => {
+      const fileExtension = data.fileName
+        .toLowerCase()
+        .substring(data.fileName.lastIndexOf("."));
+      return ALLOWED_EXTENSIONS.includes(fileExtension);
+    },
+    {
+      message: "File type not allowed",
+      path: ["fileName"],
+    }
+  )
+  .refine(data => ALLOWED_MIME_TYPES.includes(data.fileType), {
+    message: "File MIME type not allowed",
+    path: ["fileType"],
+  })
+  .refine(data => !/[<>:"/\\|?*]/.test(data.fileName), {
+    message: "File name contains invalid characters",
+    path: ["fileName"],
+  });
 
 function sanitizeFileName(fileName: string): string {
   return fileName
@@ -67,36 +67,37 @@ export async function POST(request: NextRequest) {
       return createCSRFError();
     }
 
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const { error, user } = await getAuthenticatedUser(request);
+    if (error) {
+      return error;
     }
 
-    const body: PresignedUrlRequest = await request.json();
-    const { fileName, fileSize, fileType } = body;
-
-    const validationError = validateFileInput(fileName, fileSize, fileType);
-    if (validationError) {
-      return NextResponse.json({ error: validationError }, { status: 400 });
+    const body = await parseRequestBody(request);
+    if (!body) {
+      return createErrorResponse(ERROR_MESSAGES.INVALID_REQUEST, 400);
     }
+
+    const validation = await validateRequest(presignedUrlSchema, body);
+    if (!validation.success) {
+      return createErrorResponse(validation.error, 400);
+    }
+
+    const { fileName, fileSize, fileType } = validation.data;
 
     const { db } = await connectToDatabase();
 
-    const user = await db.collection<User>("users").findOne({
-      userId: session.user.id,
+    const userData = await db.collection<User>(COLLECTIONS.USERS).findOne({
+      userId: user!.id,
     });
 
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    if (!userData) {
+      return createErrorResponse("User not found", 404);
     }
 
-    if (user.totalStorageUsed + fileSize > STORAGE_LIMIT) {
-      return NextResponse.json(
-        {
-          error: `Storage limit exceeded. You have ${((STORAGE_LIMIT - user.totalStorageUsed) / (1024 * 1024)).toFixed(2)}MB remaining.`,
-        },
-        { status: 413 }
+    if (userData.totalStorageUsed + fileSize > STORAGE_LIMIT) {
+      return createErrorResponse(
+        `Storage limit exceeded. You have ${((STORAGE_LIMIT - userData.totalStorageUsed) / (1024 * 1024)).toFixed(2)}MB remaining.`,
+        413
       );
     }
 
@@ -105,13 +106,13 @@ export async function POST(request: NextRequest) {
     const uniqueFileName = `${timestamp}_${sanitizedFileName}`;
 
     const { uploadUrl, blobPath } = await generatePresignedUploadUrl(
-      session.user.id,
+      user!.id,
       uniqueFileName,
       fileType,
       10
     );
 
-    return NextResponse.json({
+    return createSuccessResponse({
       uploadUrl,
       blobPath,
       uniqueFileName,
@@ -119,9 +120,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Error generating presigned URL:", error);
-    return NextResponse.json(
-      { error: "Failed to generate upload URL" },
-      { status: 500 }
-    );
+    return createErrorResponse("Failed to generate upload URL", 500);
   }
 }

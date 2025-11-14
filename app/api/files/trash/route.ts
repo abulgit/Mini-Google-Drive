@@ -1,35 +1,34 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { NextRequest } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
+import {
+  getAuthenticatedUser,
+  createErrorResponse,
+  createSuccessResponse,
+} from "@/lib/api-helpers";
+import { COLLECTIONS, ERROR_MESSAGES } from "@/lib/constants";
 import type { FileDocument } from "@/types";
 
-export async function GET(_request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const { error, user } = await getAuthenticatedUser(request);
+    if (error) {
+      return error;
     }
 
     const { db } = await connectToDatabase();
 
-    // Get all deleted files for the user, sorted by deletion date (newest first)
     const files = await db
-      .collection<FileDocument>("files")
+      .collection<FileDocument>(COLLECTIONS.FILES)
       .find({
-        userId: session.user.id,
-        deletedAt: { $exists: true }, // Only deleted files
+        userId: user!.id,
+        deletedAt: { $exists: true },
       })
       .sort({ deletedAt: -1 })
       .toArray();
 
-    return NextResponse.json({ files });
+    return createSuccessResponse({ files });
   } catch (error) {
     console.error("Trash files fetch error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return createErrorResponse(ERROR_MESSAGES.INTERNAL_ERROR, 500);
   }
 }

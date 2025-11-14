@@ -1,36 +1,35 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { NextRequest } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
+import {
+  getAuthenticatedUser,
+  createErrorResponse,
+  createSuccessResponse,
+} from "@/lib/api-helpers";
+import { COLLECTIONS, ERROR_MESSAGES } from "@/lib/constants";
 import type { FileDocument } from "@/types";
 
-export async function GET(_request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const { error, user } = await getAuthenticatedUser(request);
+    if (error) {
+      return error;
     }
 
     const { db } = await connectToDatabase();
 
-    // Get all starred and non-deleted files for the user, sorted by upload date (newest first)
     const files = await db
-      .collection<FileDocument>("files")
+      .collection<FileDocument>(COLLECTIONS.FILES)
       .find({
-        userId: session.user.id,
+        userId: user!.id,
         starred: true,
-        deletedAt: { $exists: false }, // Exclude deleted files
+        deletedAt: { $exists: false },
       })
       .sort({ uploadedAt: -1 })
       .toArray();
 
-    return NextResponse.json({ files });
+    return createSuccessResponse({ files });
   } catch (error) {
     console.error("Starred files fetch error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return createErrorResponse(ERROR_MESSAGES.INTERNAL_ERROR, 500);
   }
 }
