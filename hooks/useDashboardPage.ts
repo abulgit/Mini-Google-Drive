@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { useStorage } from "@/components/storage-context";
+import { useRequireAuth } from "@/hooks/useRequireAuth";
 import type { FileDocument } from "@/types";
 
 interface UseDashboardPageOptions {
@@ -9,8 +8,7 @@ interface UseDashboardPageOptions {
 }
 
 export function useDashboardPage({ endpoint }: UseDashboardPageOptions) {
-  const { data: session, status } = useSession();
-  const router = useRouter();
+  const { session, status, isAuthenticated } = useRequireAuth();
   const { refreshStorage } = useStorage();
   const [files, setFiles] = useState<FileDocument[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,17 +29,12 @@ export function useDashboardPage({ endpoint }: UseDashboardPageOptions) {
   }, [endpoint]);
 
   useEffect(() => {
-    if (status === "loading") {
-      return;
-    }
-
-    if (!session) {
-      router.push("/");
+    if (status === "loading" || !isAuthenticated) {
       return;
     }
 
     fetchFiles();
-  }, [session, status, router, fetchFiles]);
+  }, [status, isAuthenticated, fetchFiles]);
 
   const handleUploadSuccess = async () => {
     await fetchFiles();

@@ -1,6 +1,7 @@
 "use client";
 
 import { DashboardLayout } from "@/components/DashboardLayout";
+import { LoadingScreen } from "@/components/LoadingScreen";
 import { useDashboardPage } from "@/hooks/useDashboardPage";
 
 export default function DashboardPage() {
@@ -17,14 +18,7 @@ export default function DashboardPage() {
   } = useDashboardPage({ endpoint: "/api/files" });
 
   if (status === "loading") {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-muted/20">
-        <div className="text-center">
-          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   if (!session) {
