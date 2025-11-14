@@ -45,12 +45,12 @@ export function FileGridView({
 }: FileGridViewProps) {
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-medium text-foreground">
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
+        <h2 className="text-base sm:text-lg font-medium text-foreground">
           {mode === "trash" ? "Trash" : "Files"}
         </h2>
-        <div className="flex items-center gap-3">
-          <div className="text-sm text-muted-foreground">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="text-xs sm:text-sm text-muted-foreground">
             {files.length} items
           </div>
           <FileViewToggle
@@ -60,7 +60,7 @@ export function FileGridView({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
         {files.map(file => {
           const Icon = getFileIcon(file.fileType);
           const isDeleting = deletingFiles.has(file._id!.toString());
@@ -69,14 +69,14 @@ export function FileGridView({
           return (
             <div key={file._id?.toString()} className="group">
               <div
-                className={`bg-card border border-border rounded-lg p-4 hover:shadow-md hover:border-primary/20 transition-all ${mode === "trash" ? "opacity-70" : ""}`}
+                className={`bg-card border border-border rounded-lg p-3 sm:p-4 hover:shadow-md hover:border-primary/20 transition-all ${mode === "trash" ? "opacity-70" : ""}`}
               >
-                <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center justify-between mb-2 sm:mb-3">
                   <div
-                    className={`w-10 h-10 rounded-lg flex items-center justify-center cursor-pointer ${getFileTypeColor(file.fileType)}`}
+                    className={`w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center cursor-pointer ${getFileTypeColor(file.fileType)}`}
                     onClick={() => onFileClick(file._id!.toString())}
                   >
-                    <Icon className="w-5 h-5" />
+                    <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
 
                   <FileDropdownMenu
@@ -90,7 +90,7 @@ export function FileGridView({
                     onRename={onRename}
                     onDelete={onDelete}
                     onRestore={onRestore}
-                    className="w-6 h-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="w-6 h-6 p-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
                   />
                 </div>
 
@@ -98,7 +98,7 @@ export function FileGridView({
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <p
-                        className="text-sm font-medium text-card-foreground truncate cursor-pointer"
+                        className="text-xs sm:text-sm font-medium text-card-foreground truncate cursor-pointer"
                         onClick={() => onFileClick(file._id!.toString())}
                       >
                         {file.originalFileName}
@@ -107,16 +107,19 @@ export function FileGridView({
                     <TooltipContent>{file.originalFileName}</TooltipContent>
                   </Tooltip>
 
-                  <div className="flex items-center justify-between">
-                    <Badge variant="secondary" className="text-xs">
+                  <div className="flex items-center justify-between gap-1">
+                    <Badge
+                      variant="secondary"
+                      className="text-[10px] sm:text-xs px-1.5 py-0"
+                    >
                       {getFileExtension(file.originalFileName)}
                     </Badge>
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-[10px] sm:text-xs text-muted-foreground">
                       {formatBytes(file.fileSize)}
                     </span>
                   </div>
 
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">
                     {mode === "trash"
                       ? `Deleted ${formatDate(file.deletedAt!)}`
                       : formatDate(file.uploadedAt)}

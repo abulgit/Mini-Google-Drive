@@ -217,18 +217,18 @@ export function UploadModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-w-[95vw]">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <FileUp className="w-5 h-5 text-primary" />
+          <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <FileUp className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
             Upload File
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-xs sm:text-sm">
             Choose a file to upload to your Mini Drive
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           <Input
             ref={fileInputRef}
             type="file"
@@ -245,7 +245,7 @@ export function UploadModal({
           {/* Drop Zone */}
           <div
             className={cn(
-              "relative border-2 border-dashed rounded-lg p-8 text-center transition-all duration-200 min-h-[200px] flex flex-col items-center justify-center",
+              "relative border-2 border-dashed rounded-lg p-4 sm:p-8 text-center transition-all duration-200 min-h-[180px] sm:min-h-[200px] flex flex-col items-center justify-center",
               dragOver
                 ? "border-primary bg-primary/5"
                 : "border-border hover:border-primary/50 bg-muted/20",
@@ -256,12 +256,12 @@ export function UploadModal({
             onDragLeave={handleDragLeave}
           >
             {uploading ? (
-              <div className="space-y-4">
-                <div className="w-16 h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center">
-                  <Cloud className="w-8 h-8 text-primary" />
+              <div className="space-y-3 sm:space-y-4">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center">
+                  <Cloud className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
                 </div>
                 <div className="space-y-2">
-                  <h3 className="text-lg font-medium text-foreground">
+                  <h3 className="text-base sm:text-lg font-medium text-foreground">
                     {uploadComplete ? "Upload Complete!" : "Uploading file..."}
                   </h3>
                   <div className="w-full bg-muted rounded-full h-2 max-w-xs mx-auto">
@@ -273,37 +273,37 @@ export function UploadModal({
                       style={{ width: `${uploadProgress}%` }}
                     ></div>
                   </div>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs sm:text-sm text-muted-foreground">
                     {uploadComplete
                       ? "File uploaded successfully!"
                       : `${uploadProgress}% complete`}
                   </p>
                 </div>
                 {uploadComplete && (
-                  <CheckCircle className="w-8 h-8 text-green-600 mx-auto" />
+                  <CheckCircle className="w-6 h-6 sm:w-8 sm:h-8 text-green-600 mx-auto" />
                 )}
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 <div
                   className={cn(
-                    "w-16 h-16 mx-auto rounded-full flex items-center justify-center transition-colors",
+                    "w-12 h-12 sm:w-16 sm:h-16 mx-auto rounded-full flex items-center justify-center transition-colors",
                     dragOver ? "bg-primary/10" : "bg-muted"
                   )}
                 >
                   <Upload
                     className={cn(
-                      "w-8 h-8 transition-colors",
+                      "w-6 h-6 sm:w-8 sm:h-8 transition-colors",
                       dragOver ? "text-primary" : "text-muted-foreground"
                     )}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <h3 className="text-lg font-medium text-foreground">
+                  <h3 className="text-base sm:text-lg font-medium text-foreground">
                     {dragOver ? "Drop your file here" : "Drag and drop a file"}
                   </h3>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs sm:text-sm text-muted-foreground">
                     or{" "}
                     <button
                       onClick={() => fileInputRef.current?.click()}
@@ -313,11 +313,8 @@ export function UploadModal({
                       browse from your computer
                     </button>
                   </p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">
                     Maximum file size: {formatBytes(STORAGE_LIMIT)}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Supported formats: {ALLOWED_EXTENSIONS.join(", ")}
                   </p>
                 </div>
               </div>
@@ -326,9 +323,9 @@ export function UploadModal({
 
           {/* Error Display */}
           {error && (
-            <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg flex items-center gap-2 text-sm text-destructive">
+            <div className="p-2 sm:p-3 bg-destructive/10 border border-destructive/20 rounded-lg flex items-center gap-2 text-xs sm:text-sm text-destructive">
               <AlertCircle className="w-4 h-4 flex-shrink-0" />
-              <span className="flex-1">{error}</span>
+              <span className="flex-1 break-words">{error}</span>
               <button
                 onClick={() => setError(null)}
                 className="text-destructive hover:text-destructive/80"
@@ -339,12 +336,12 @@ export function UploadModal({
           )}
 
           {/* Action Buttons */}
-          <div className="flex gap-2 pt-4">
+          <div className="flex gap-2 pt-2 sm:pt-4">
             <Button
               variant="outline"
               onClick={() => fileInputRef.current?.click()}
               disabled={uploading || csrfLoading || !csrfToken}
-              className="flex-1"
+              className="flex-1 text-xs sm:text-sm h-9 sm:h-10"
             >
               {csrfLoading ? "Loading..." : "Choose File"}
             </Button>
@@ -352,6 +349,7 @@ export function UploadModal({
               variant="outline"
               onClick={handleClose}
               disabled={uploading}
+              className="text-xs sm:text-sm h-9 sm:h-10"
             >
               {uploading ? "Uploading..." : "Cancel"}
             </Button>

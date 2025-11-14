@@ -46,26 +46,26 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30">
       {/* Header */}
       <header className="relative z-10">
-        <div className="container mx-auto px-6 py-6">
+        <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-6">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2 sm:space-x-3">
               <Image
                 src="/logo.png"
                 alt="Mini Drive Logo"
-                width={40}
-                height={40}
-                className="rounded-xl shadow-lg"
+                width={32}
+                height={32}
+                className="rounded-xl shadow-lg sm:w-10 sm:h-10"
               />
-              <h1 className="text-2xl font-bold text-foreground tracking-tight">
+              <h1 className="text-lg sm:text-2xl font-bold text-foreground tracking-tight">
                 Mini Drive
               </h1>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2">
               <ThemeToggleButton variant="circle" start="center" />
               <Button
                 size="sm"
                 onClick={handleGetStarted}
-                className="border border-border/50 text-foreground hover:bg-muted/50"
+                className="border border-border/50 text-foreground hover:bg-muted/50 text-xs sm:text-sm h-8 sm:h-9 px-3 sm:px-4"
               >
                 Sign in
               </Button>
@@ -75,22 +75,22 @@ export default function Home() {
       </header>
 
       {/* Main Content */}
-      <main className="relative z-10 flex items-center justify-center min-h-[80vh] px-6">
+      <main className="relative z-10 flex items-center justify-center min-h-[80vh] px-4 sm:px-6">
         <div className="w-full max-w-4xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
+          <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center">
             {/* Left Content */}
-            <div className="text-center lg:text-left space-y-8">
-              <div className="space-y-6">
-                <div className="inline-flex items-center px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium">
+            <div className="text-center lg:text-left space-y-6 sm:space-y-8">
+              <div className="space-y-4 sm:space-y-6">
+                <div className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs sm:text-sm font-medium">
                   <span className="w-2 h-2 bg-primary rounded-full mr-2 animate-pulse"></span>
                   5GB free cloud storage
                 </div>
-                <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-tight tracking-tight">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-foreground leading-tight tracking-tight">
                   Your files,
                   <br />
                   <span className="text-primary">anywhere</span>
                 </h1>
-                <p className="text-xl text-muted-foreground max-w-md mx-auto lg:mx-0 leading-relaxed">
+                <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-md mx-auto lg:mx-0 leading-relaxed">
                   Secure cloud storage with Google authentication. Access your
                   files from any device, anywhere in the world.
                 </p>
@@ -100,21 +100,21 @@ export default function Home() {
                 <Button
                   size="lg"
                   onClick={handleGetStarted}
-                  className="px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
+                  className="px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
                 >
                   Get started free
                 </Button>
               </div>
 
               {/* Trust indicators */}
-              <div className="flex items-center justify-center lg:justify-start space-x-6 pt-4">
-                <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 sm:gap-6 pt-4">
+                <div className="flex items-center space-x-2 text-xs sm:text-sm text-muted-foreground">
                   <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
                     <span className="text-xs text-white">✓</span>
                   </div>
                   <span>No credit card required</span>
                 </div>
-                <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                <div className="flex items-center space-x-2 text-xs sm:text-sm text-muted-foreground">
                   <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
                     <span className="text-xs text-white">🔒</span>
                   </div>
@@ -124,14 +124,14 @@ export default function Home() {
             </div>
 
             {/* Right Content - Visual Element */}
-            <div className="relative">
+            <div className="relative hidden lg:block">
               <div className="relative w-full max-w-lg mx-auto">
                 {/* Background elements */}
-                <div className="absolute -top-8 -right-8 w-32 h-32 bg-primary/20 rounded-3xl rotate-12"></div>
-                <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-accent/20 rounded-2xl -rotate-6"></div>
+                <div className="absolute -top-8 -right-8 w-24 sm:w-32 h-24 sm:h-32 bg-primary/20 rounded-3xl rotate-12"></div>
+                <div className="absolute -bottom-6 -left-6 w-20 sm:w-24 h-20 sm:h-24 bg-accent/20 rounded-2xl -rotate-6"></div>
 
                 {/* Main visual */}
-                <div className="relative bg-gradient-to-br from-card to-card/80 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border border-border/50">
+                <div className="relative bg-gradient-to-br from-card to-card/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-2xl border border-border/50">
                   <div className="space-y-6">
                     {/* App mockup */}
                     <div className="bg-gradient-to-br from-primary/10 to-accent/10 rounded-2xl p-6 border border-border/30">

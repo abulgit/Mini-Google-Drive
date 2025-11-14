@@ -40,13 +40,13 @@ export function FileListView({
 }: FileListViewProps) {
   return (
     <div className="bg-card rounded-lg border border-border">
-      <div className="px-6 py-4 border-b border-border">
+      <div className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 border-b border-border">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-medium text-card-foreground">
+          <h2 className="text-base sm:text-lg font-medium text-card-foreground">
             {mode === "trash" ? "Trash" : "Files"}
           </h2>
-          <div className="flex items-center gap-3">
-            <div className="text-sm text-muted-foreground">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="text-xs sm:text-sm text-muted-foreground">
               {files.length} items
             </div>
             <FileViewToggle
@@ -66,21 +66,21 @@ export function FileListView({
           return (
             <div
               key={file._id?.toString()}
-              className={`flex items-center px-6 py-4 hover:bg-muted/50 group ${mode === "trash" ? "opacity-70" : ""}`}
+              className={`flex items-center px-3 sm:px-4 md:px-6 py-3 sm:py-4 hover:bg-muted/50 group ${mode === "trash" ? "opacity-70" : ""}`}
             >
               <div className="flex items-center flex-1 min-w-0">
                 <div
-                  className={`w-10 h-10 rounded-lg flex items-center justify-center mr-4 cursor-pointer ${getFileTypeColor(file.fileType)}`}
+                  className={`w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center mr-3 sm:mr-4 cursor-pointer ${getFileTypeColor(file.fileType)}`}
                   onClick={e => {
                     e.stopPropagation();
                     onFileClick(file._id!.toString());
                   }}
                 >
-                  <Icon className="w-5 h-5" />
+                  <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p
-                    className="text-sm font-medium text-card-foreground truncate cursor-pointer"
+                    className="text-xs sm:text-sm font-medium text-card-foreground truncate cursor-pointer"
                     title={file.originalFileName}
                     onClick={e => {
                       e.stopPropagation();
@@ -89,7 +89,7 @@ export function FileListView({
                   >
                     {file.originalFileName}
                   </p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-[10px] sm:text-sm text-muted-foreground truncate">
                     {mode === "trash"
                       ? `Deleted ${formatDate(file.deletedAt!)} • ${formatBytes(file.fileSize)}`
                       : `${formatDate(file.uploadedAt)} • ${formatBytes(file.fileSize)}`}
@@ -97,8 +97,11 @@ export function FileListView({
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
-                <Badge variant="secondary" className="text-xs">
+              <div className="flex items-center gap-1 sm:gap-2 ml-2">
+                <Badge
+                  variant="secondary"
+                  className="text-[10px] sm:text-xs hidden sm:inline-flex"
+                >
                   {getFileExtension(file.originalFileName)}
                 </Badge>
 
@@ -113,7 +116,7 @@ export function FileListView({
                   onRename={onRename}
                   onDelete={onDelete}
                   onRestore={onRestore}
-                  className="w-8 h-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="w-7 h-7 sm:w-8 sm:h-8 p-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
                 />
               </div>
             </div>
