@@ -6,13 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatBytes, formatDate } from "@/lib/utils";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -29,13 +22,10 @@ import {
 import { toast } from "sonner";
 import { useCSRFToken } from "@/hooks/useCSRFToken";
 import { ViewFileModal } from "@/components/view-file-modal";
+import { FileDropdownMenu } from "@/components/FileDropdownMenu";
 import type { FileDocument } from "@/types";
 import {
-  MoreVertical,
-  Download,
   Trash2,
-  Star,
-  RotateCcw,
   FileText,
   Image as ImageIcon,
   Video,
@@ -389,81 +379,18 @@ export function FileDisplay({
                         {file.fileType.split("/")[1]?.toUpperCase() || "FILE"}
                       </Badge>
 
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="w-8 h-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <MoreVertical className="w-4 h-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={() => handleDownload(file._id!.toString())}
-                          >
-                            <Download className="w-4 h-4 mr-2" />
-                            Download
-                          </DropdownMenuItem>
-
-                          {mode === "files" ? (
-                            <>
-                              <DropdownMenuItem
-                                onClick={() =>
-                                  handleStarToggle(
-                                    file._id!.toString(),
-                                    file.starred || false
-                                  )
-                                }
-                              >
-                                <Star
-                                  className={`w-4 h-4 mr-2 ${file.starred ? "fill-current" : ""}`}
-                                />
-                                {file.starred
-                                  ? "Remove from starred"
-                                  : "Add to starred"}
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem
-                                onClick={() =>
-                                  handleDelete(file._id!.toString())
-                                }
-                                disabled={isDeleting}
-                                className="text-destructive focus:text-destructive"
-                              >
-                                <Trash2 className="w-4 h-4 mr-2" />
-                                {isDeleting
-                                  ? "Moving to trash..."
-                                  : "Move to trash"}
-                              </DropdownMenuItem>
-                            </>
-                          ) : (
-                            <>
-                              <DropdownMenuItem
-                                onClick={() =>
-                                  handleRestore(file._id!.toString())
-                                }
-                                disabled={isProcessing}
-                              >
-                                <RotateCcw className="w-4 h-4 mr-2" />
-                                {isProcessing ? "Restoring..." : "Restore"}
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem
-                                onClick={() =>
-                                  handleDelete(file._id!.toString())
-                                }
-                                disabled={isProcessing}
-                                className="text-destructive focus:text-destructive"
-                              >
-                                <Trash2 className="w-4 h-4 mr-2" />
-                                Delete permanently
-                              </DropdownMenuItem>
-                            </>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      <FileDropdownMenu
+                        fileId={file._id!.toString()}
+                        mode={mode}
+                        isStarred={file.starred}
+                        isDeleting={isDeleting}
+                        isProcessing={isProcessing}
+                        onDownload={handleDownload}
+                        onStarToggle={handleStarToggle}
+                        onDelete={handleDelete}
+                        onRestore={handleRestore}
+                        className="w-8 h-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                      />
                     </div>
                   </div>
                 );
@@ -523,83 +450,18 @@ export function FileDisplay({
                           <Icon className="w-5 h-5" />
                         </div>
 
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="w-6 h-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                            >
-                              <MoreVertical className="w-4 h-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onClick={() =>
-                                handleDownload(file._id!.toString())
-                              }
-                            >
-                              <Download className="w-4 h-4 mr-2" />
-                              Download
-                            </DropdownMenuItem>
-
-                            {mode === "files" ? (
-                              <>
-                                <DropdownMenuItem
-                                  onClick={() =>
-                                    handleStarToggle(
-                                      file._id!.toString(),
-                                      file.starred || false
-                                    )
-                                  }
-                                >
-                                  <Star
-                                    className={`w-4 h-4 mr-2 ${file.starred ? "fill-current" : ""}`}
-                                  />
-                                  {file.starred
-                                    ? "Remove from starred"
-                                    : "Add to starred"}
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem
-                                  onClick={() =>
-                                    handleDelete(file._id!.toString())
-                                  }
-                                  disabled={isDeleting}
-                                  className="text-destructive focus:text-destructive"
-                                >
-                                  <Trash2 className="w-4 h-4 mr-2" />
-                                  {isDeleting
-                                    ? "Moving to trash..."
-                                    : "Move to trash"}
-                                </DropdownMenuItem>
-                              </>
-                            ) : (
-                              <>
-                                <DropdownMenuItem
-                                  onClick={() =>
-                                    handleRestore(file._id!.toString())
-                                  }
-                                  disabled={isProcessing}
-                                >
-                                  <RotateCcw className="w-4 h-4 mr-2" />
-                                  {isProcessing ? "Restoring..." : "Restore"}
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem
-                                  onClick={() =>
-                                    handleDelete(file._id!.toString())
-                                  }
-                                  disabled={isProcessing}
-                                  className="text-destructive focus:text-destructive"
-                                >
-                                  <Trash2 className="w-4 h-4 mr-2" />
-                                  Delete permanently
-                                </DropdownMenuItem>
-                              </>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        <FileDropdownMenu
+                          fileId={file._id!.toString()}
+                          mode={mode}
+                          isStarred={file.starred}
+                          isDeleting={isDeleting}
+                          isProcessing={isProcessing}
+                          onDownload={handleDownload}
+                          onStarToggle={handleStarToggle}
+                          onDelete={handleDelete}
+                          onRestore={handleRestore}
+                          className="w-6 h-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                        />
                       </div>
 
                       <div className="space-y-1">
