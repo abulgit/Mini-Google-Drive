@@ -23,3 +23,19 @@ export function formatDate(date: Date | string): string {
     day: "numeric",
   });
 }
+
+export function formatSpeed(bytesPerSecond: number): string {
+  return `${formatBytes(bytesPerSecond)}/s`;
+}
+
+export function formatTimeRemaining(seconds: number): string {
+  if (seconds < 1) {
+    return "< 1s";
+  }
+  if (seconds < 60) {
+    return `${Math.round(seconds)}s`;
+  }
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = Math.round(seconds % 60);
+  return `${minutes}m ${remainingSeconds}s`;
+}

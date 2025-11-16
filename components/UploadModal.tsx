@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { STORAGE_LIMIT, ALLOWED_EXTENSIONS } from "@/types";
 import { useFileUpload } from "@/hooks/useFileUpload";
-import { cn, formatBytes } from "@/lib/utils";
+import { cn, formatBytes, formatSpeed, formatTimeRemaining } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -39,6 +39,8 @@ export function UploadModal({
     uploadProgress,
     uploadComplete,
     error,
+    uploadSpeed,
+    timeRemaining,
     csrfToken,
     csrfLoading,
     fileInputRef,
@@ -141,6 +143,13 @@ export function UploadModal({
                       ? "File uploaded successfully!"
                       : `${uploadProgress}% complete`}
                   </p>
+                  {!uploadComplete && uploadSpeed > 0 && (
+                    <div className="flex items-center justify-center gap-2 text-[10px] sm:text-xs text-muted-foreground">
+                      <span>{formatSpeed(uploadSpeed)}</span>
+                      <span>•</span>
+                      <span>{formatTimeRemaining(timeRemaining)} left</span>
+                    </div>
+                  )}
                 </div>
                 {uploadComplete && (
                   <CheckCircle className="w-6 h-6 sm:w-8 sm:h-8 text-green-600 mx-auto" />

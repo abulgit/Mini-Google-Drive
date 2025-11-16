@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { STORAGE_LIMIT, ALLOWED_EXTENSIONS } from "@/types";
 import { useFileUpload } from "@/hooks/useFileUpload";
-import { cn, formatBytes } from "@/lib/utils";
+import { cn, formatBytes, formatSpeed, formatTimeRemaining } from "@/lib/utils";
 import { Upload, Cloud, Plus } from "lucide-react";
 
 interface FileUploadProps {
@@ -18,6 +18,8 @@ export function FileUpload({ onUploadSuccess, className }: FileUploadProps) {
   const {
     uploading,
     uploadProgress,
+    uploadSpeed,
+    timeRemaining,
     csrfToken,
     csrfLoading,
     fileInputRef,
@@ -110,6 +112,13 @@ export function FileUpload({ onUploadSuccess, className }: FileUploadProps) {
                 <p className="text-sm text-gray-600">
                   {uploadProgress}% complete
                 </p>
+                {uploadSpeed > 0 && (
+                  <div className="flex items-center justify-center gap-3 text-xs text-gray-500">
+                    <span>{formatSpeed(uploadSpeed)}</span>
+                    <span>•</span>
+                    <span>{formatTimeRemaining(timeRemaining)} left</span>
+                  </div>
+                )}
               </div>
             </div>
           ) : (

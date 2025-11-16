@@ -17,6 +17,8 @@ export function useFileUpload({
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [uploadComplete, setUploadComplete] = useState(false);
+  const [uploadSpeed, setUploadSpeed] = useState<number>(0);
+  const [timeRemaining, setTimeRemaining] = useState<number>(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { csrfToken, loading: csrfLoading } = useCSRFToken();
 
@@ -54,8 +56,13 @@ export function useFileUpload({
     setError(null);
     setUploadProgress(0);
     setUploadComplete(false);
+    setUploadSpeed(0);
+    setTimeRemaining(0);
 
     let blobPath = "";
+    let startTime = Date.now();
+    let lastLoaded = 0;
+    let lastTime = Date.now();
 
     try {
       const sasResponse = await fetch("/api/upload/sas", {
@@ -87,6 +94,22 @@ export function useFileUpload({
           if (e.lengthComputable) {
             const percentComplete = Math.round((e.loaded / e.total) * 95);
             setUploadProgress(percentComplete);
+
+            const currentTime = Date.now();
+            const timeDiff = (currentTime - lastTime) / 1000;
+
+            if (timeDiff > 0.1) {
+              const bytesDiff = e.loaded - lastLoaded;
+              const speed = bytesDiff / timeDiff;
+              setUploadSpeed(speed);
+
+              const bytesRemaining = e.total - e.loaded;
+              const timeLeft = speed > 0 ? bytesRemaining / speed : 0;
+              setTimeRemaining(timeLeft);
+
+              lastLoaded = e.loaded;
+              lastTime = currentTime;
+            }
           }
         });
 
@@ -178,6 +201,8 @@ export function useFileUpload({
     setError(null);
     setUploadProgress(0);
     setUploadComplete(false);
+    setUploadSpeed(0);
+    setTimeRemaining(0);
   };
 
   return {
@@ -185,6 +210,8 @@ export function useFileUpload({
     uploadProgress,
     uploadComplete,
     error,
+    uploadSpeed,
+    timeRemaining,
     csrfToken,
     csrfLoading,
     fileInputRef,
