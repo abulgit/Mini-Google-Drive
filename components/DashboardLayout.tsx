@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { DashboardHeader } from "@/components/dashboard-header";
-import { Sidebar } from "@/components/sidebar";
+import { DashboardHeader } from "@/components/DashboardHeader";
+import { Sidebar } from "@/components/SidebarComponent";
 import { FileDisplay } from "@/components/FileDisplay";
-import { UploadModal } from "@/components/upload-modal";
+import { UploadModal } from "@/components/UploadModal";
 import type { FileDocument } from "@/types";
 
 interface DashboardLayoutProps {

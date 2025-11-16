@@ -46,9 +46,7 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
     <TooltipProvider>
       <header className="border-b border-border bg-card sticky top-0 z-40">
         <div className="flex items-center justify-between px-3 sm:px-4 md:px-6 py-2 md:py-3">
-          {/* Left Section - Menu + Logo + Search */}
           <div className="flex items-center gap-2 sm:gap-4 md:gap-6 flex-1">
-            {/* Mobile Menu Button */}
             <Button
               variant="ghost"
               size="sm"
@@ -58,7 +56,6 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
               <Menu className="w-5 h-5" />
             </Button>
 
-            {/* Logo */}
             <div className="flex items-center gap-2 md:gap-3">
               <Image
                 src="/logo.png"
@@ -72,7 +69,6 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
               </h1>
             </div>
 
-            {/* Search - Hidden on small mobile */}
             <div className="hidden sm:flex flex-1 max-w-2xl">
               <div className="relative w-full">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-muted-foreground" />
@@ -94,17 +90,13 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
             </div>
           </div>
 
-          {/* Right Section - Search Icon (mobile) + Theme + Profile */}
           <div className="flex items-center gap-1 sm:gap-2">
-            {/* Mobile Search Button */}
             <Button variant="ghost" size="sm" className="sm:hidden w-9 h-9 p-0">
               <Search className="w-5 h-5" />
             </Button>
 
-            {/* Theme Toggle Button */}
             <ThemeToggleButton variant="circle" start="center" />
 
-            {/* Profile Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button

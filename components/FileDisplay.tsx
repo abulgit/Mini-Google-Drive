@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { ViewFileModal } from "@/components/view-file-modal";
+import { ViewFileModal } from "@/components/ViewFileModal";
 import { FileEmptyState } from "@/components/FileEmptyState";
 import { FileListView } from "@/components/FileListView";
 import { FileGridView } from "@/components/FileGridView";

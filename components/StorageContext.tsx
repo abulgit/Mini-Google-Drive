@@ -23,7 +23,6 @@ export function StorageProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(false);
 
   const fetchStorage = useCallback(async () => {
-    // Only fetch if we don't already have data and aren't currently loading
     if (storage !== null || loading) {
       return;
     }

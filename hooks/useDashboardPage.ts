@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useStorage } from "@/components/storage-context";
+import { useStorage } from "@/components/StorageContext";
 import { useRequireAuth } from "@/hooks/useRequireAuth";
 import type { FileDocument } from "@/types";
 

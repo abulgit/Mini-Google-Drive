@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Download, FileText } from "lucide-react";
+import Image from "next/image";
 import {
   Dialog,
   DialogContent,
@@ -24,15 +25,7 @@ export function ViewFileModal({ file, isOpen, onClose }: ViewFileModalProps) {
   const [fileUrl, setFileUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (file && isOpen) {
-      fetchFileUrl();
-    } else {
-      setFileUrl(null);
-    }
-  }, [file, isOpen]);
-
-  const fetchFileUrl = async () => {
+  const fetchFileUrl = useCallback(async () => {
     if (!file) {
       return;
     }
@@ -52,7 +45,15 @@ export function ViewFileModal({ file, isOpen, onClose }: ViewFileModalProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [file]);
+
+  useEffect(() => {
+    if (file && isOpen) {
+      fetchFileUrl();
+    } else {
+      setFileUrl(null);
+    }
+  }, [file, isOpen, fetchFileUrl]);
 
   const handleDownload = () => {
     if (fileUrl) {
@@ -60,7 +61,6 @@ export function ViewFileModal({ file, isOpen, onClose }: ViewFileModalProps) {
     }
   };
 
-  // Use larger modal size for images to accommodate large images
   const modalClass = file?.fileType.startsWith("image/")
     ? "w-[50vw] max-w-[1400px] h-[70vh] max-h-[700px] overflow-hidden"
     : "w-[50vw] max-w-[1200px] h-[70vh] max-h-[700px] overflow-hidden";
@@ -76,13 +76,17 @@ export function ViewFileModal({ file, isOpen, onClose }: ViewFileModalProps) {
 
     if (isImage) {
       return (
-        <img
-          src={fileUrl}
-          alt={file.originalFileName}
-          className="w-full h-full object-contain"
-          onContextMenu={e => e.preventDefault()}
-          onError={() => toast.error("Failed to load image")}
-        />
+        <div className="relative w-full h-full">
+          <Image
+            src={fileUrl}
+            alt={file.originalFileName}
+            fill
+            className="object-contain"
+            onContextMenu={e => e.preventDefault()}
+            onError={() => toast.error("Failed to load image")}
+            unoptimized
+          />
+        </div>
       );
     }
 
@@ -119,7 +123,6 @@ export function ViewFileModal({ file, isOpen, onClose }: ViewFileModalProps) {
       );
     }
 
-    // For documents and other files
     return (
       <div className="flex flex-col items-center justify-center h-full">
         <FileText className="w-16 h-16 text-muted-foreground mb-4" />

@@ -23,7 +23,7 @@ import {
   HelpCircle,
 } from "lucide-react";
 import { useEffect } from "react";
-import { useStorage } from "@/components/storage-context";
+import { useStorage } from "@/components/StorageContext";
 
 interface SidebarProps {
   className?: string;
@@ -36,7 +36,6 @@ export function Sidebar({ className, onNewClick }: SidebarProps) {
   const { storage, loading, fetchStorage } = useStorage();
   const [buyStorageModalOpen, setBuyStorageModalOpen] = useState(false);
 
-  // Determine active item based on current path
   const getActiveItem = useCallback(() => {
     if (pathname === "/dashboard/starred") {
       return "starred";
@@ -52,7 +51,6 @@ export function Sidebar({ className, onNewClick }: SidebarProps) {
 
   const [activeItem, setActiveItem] = useState(getActiveItem());
 
-  // Fetch storage on mount if not already loaded
   useEffect(() => {
     fetchStorage();
   }, [fetchStorage]);
@@ -71,7 +69,6 @@ export function Sidebar({ className, onNewClick }: SidebarProps) {
         router.push("/dashboard/starred");
         break;
       case "recent":
-        // Future implementation
         break;
       case "trash":
         router.push("/dashboard/trash");
@@ -113,7 +110,6 @@ export function Sidebar({ className, onNewClick }: SidebarProps) {
         className
       )}
     >
-      {/* New Button */}
       <div className="p-4">
         <Button
           onClick={onNewClick}
@@ -126,7 +122,6 @@ export function Sidebar({ className, onNewClick }: SidebarProps) {
         </Button>
       </div>
 
-      {/* Navigation */}
       <div className="flex-1 px-3">
         <nav className="space-y-1">
           {navigationItems.map(item => {
@@ -161,7 +156,6 @@ export function Sidebar({ className, onNewClick }: SidebarProps) {
           })}
         </nav>
 
-        {/* Storage Section */}
         <div className="mt-8 px-3">
           <div className="space-y-3">
             <div className="text-sm font-medium text-card-foreground">
@@ -199,7 +193,6 @@ export function Sidebar({ className, onNewClick }: SidebarProps) {
         </div>
       </div>
 
-      {/* Bottom Actions */}
       <div className="p-3 border-t border-border">
         <div className="space-y-1">
           <button className="w-full flex items-center gap-3 px-3 py-2 text-sm text-card-foreground hover:bg-muted rounded-lg transition-colors">
@@ -213,7 +206,6 @@ export function Sidebar({ className, onNewClick }: SidebarProps) {
         </div>
       </div>
 
-      {/* Buy Storage Modal */}
       <Dialog open={buyStorageModalOpen} onOpenChange={setBuyStorageModalOpen}>
         <DialogContent>
           <DialogHeader>

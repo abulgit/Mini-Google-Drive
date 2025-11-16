@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
-import { STORAGE_LIMIT, validateFileType, ALLOWED_EXTENSIONS } from "@/types";
-import { useCSRFToken } from "@/hooks/useCSRFToken";
+import { STORAGE_LIMIT, ALLOWED_EXTENSIONS } from "@/types";
+import { useFileUpload } from "@/hooks/useFileUpload";
 import { cn, formatBytes } from "@/lib/utils";
 import { Upload, Cloud, Plus } from "lucide-react";
 
@@ -15,152 +14,15 @@ interface FileUploadProps {
 }
 
 export function FileUpload({ onUploadSuccess, className }: FileUploadProps) {
-  const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const { csrfToken, loading: csrfLoading } = useCSRFToken();
-
-  const validateFile = (file: File): string | null => {
-    // File type validation
-    const fileTypeError = validateFileType(file);
-    if (fileTypeError) {
-      return fileTypeError;
-    }
-
-    if (file.size > STORAGE_LIMIT) {
-      return `File size (${formatBytes(file.size)}) exceeds maximum limit of ${formatBytes(STORAGE_LIMIT)}`;
-    }
-    if (file.size === 0) {
-      return "Cannot upload empty files";
-    }
-    if (!file.name || file.name.trim() === "") {
-      return "File must have a valid name";
-    }
-    const dangerousChars = /[<>:"/\\|?*]/;
-    if (dangerousChars.test(file.name)) {
-      return "File name contains invalid characters";
-    }
-    return null;
-  };
-
-  const handleFileSelect = (file: File) => {
-    if (file) {
-      const validationError = validateFile(file);
-      if (validationError) {
-        toast.error(validationError);
-        return;
-      }
-      uploadFile(file);
-    }
-  };
-
-  const uploadFile = async (file: File) => {
-    if (!csrfToken) {
-      toast.error("Security token not available. Please refresh the page.");
-      return;
-    }
-
-    setUploading(true);
-    setUploadProgress(0);
-
-    let blobPath = "";
-
-    try {
-      const sasResponse = await fetch("/api/upload/sas", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRF-Token": csrfToken,
-        },
-        body: JSON.stringify({
-          fileName: file.name,
-          fileSize: file.size,
-          fileType: file.type,
-        }),
-      });
-
-      if (!sasResponse.ok) {
-        const errorData = await sasResponse.json();
-        throw new Error(errorData.error || "Failed to get upload URL");
-      }
-
-      const sasData = await sasResponse.json();
-      const { uploadUrl } = sasData;
-      blobPath = sasData.blobPath;
-
-      await new Promise<void>((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-
-        xhr.upload.addEventListener("progress", e => {
-          if (e.lengthComputable) {
-            const percentComplete = Math.round((e.loaded / e.total) * 95);
-            setUploadProgress(percentComplete);
-          }
-        });
-
-        xhr.addEventListener("load", () => {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            setUploadProgress(95);
-            resolve();
-          } else {
-            reject(new Error(`Upload failed with status: ${xhr.status}`));
-          }
-        });
-
-        xhr.addEventListener("error", () => {
-          reject(new Error("Network error during upload"));
-        });
-
-        xhr.addEventListener("abort", () => {
-          reject(new Error("Upload cancelled"));
-        });
-
-        xhr.open("PUT", uploadUrl, true);
-        xhr.setRequestHeader("x-ms-blob-type", "BlockBlob");
-        xhr.setRequestHeader("Content-Type", file.type);
-        xhr.send(file);
-      });
-
-      setUploadProgress(98);
-
-      const completeResponse = await fetch("/api/upload/complete", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRF-Token": csrfToken,
-        },
-        body: JSON.stringify({
-          blobPath,
-          originalFileName: file.name,
-        }),
-      });
-
-      if (!completeResponse.ok) {
-        const errorData = await completeResponse.json();
-        throw new Error(errorData.error || "Failed to complete upload");
-      }
-
-      setUploadProgress(100);
-      toast.success("File uploaded successfully!");
-
-      setTimeout(() => {
-        onUploadSuccess();
-        setUploadProgress(0);
-      }, 1000);
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Upload failed");
-      setUploadProgress(0);
-    } finally {
-      setTimeout(() => {
-        setUploading(false);
-      }, 1000);
-
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
-    }
-  };
+  const {
+    uploading,
+    uploadProgress,
+    csrfToken,
+    csrfLoading,
+    fileInputRef,
+    handleFileSelect,
+  } = useFileUpload({ onSuccess: onUploadSuccess });
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
@@ -184,7 +46,6 @@ export function FileUpload({ onUploadSuccess, className }: FileUploadProps) {
 
   return (
     <div className={cn("w-full", className)}>
-      {/* Compact Upload Button for Sidebar */}
       <div className="mb-6">
         <Button
           onClick={() => fileInputRef.current?.click()}
@@ -205,7 +66,6 @@ export function FileUpload({ onUploadSuccess, className }: FileUploadProps) {
         </Button>
       </div>
 
-      {/* Drop Zone */}
       <div
         className={cn(
           "relative border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200",

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { SigninModal } from "@/components/signin-modal";
+import { SigninModal } from "@/components/SigninModal";
 import ThemeToggleButton from "@/components/ui/theme-toggle-button";
 
 export default function Home() {

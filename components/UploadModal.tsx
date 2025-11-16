@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { STORAGE_LIMIT, validateFileType, ALLOWED_EXTENSIONS } from "@/types";
-import { useCSRFToken } from "@/hooks/useCSRFToken";
+import { STORAGE_LIMIT, ALLOWED_EXTENSIONS } from "@/types";
+import { useFileUpload } from "@/hooks/useFileUpload";
 import { cn, formatBytes } from "@/lib/utils";
 import {
   Dialog,
@@ -33,164 +33,28 @@ export function UploadModal({
   onClose,
   onUploadSuccess,
 }: UploadModalProps) {
-  const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [uploadComplete, setUploadComplete] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const { csrfToken, loading: csrfLoading } = useCSRFToken();
-
-  const validateFile = (file: File): string | null => {
-    // File type validation
-    const fileTypeError = validateFileType(file);
-    if (fileTypeError) {
-      return fileTypeError;
-    }
-
-    if (file.size > STORAGE_LIMIT) {
-      return `File size (${formatBytes(file.size)}) exceeds maximum limit of ${formatBytes(STORAGE_LIMIT)}`;
-    }
-    if (file.size === 0) {
-      return "Cannot upload empty files";
-    }
-    if (!file.name || file.name.trim() === "") {
-      return "File must have a valid name";
-    }
-    const dangerousChars = /[<>:"/\\|?*]/;
-    if (dangerousChars.test(file.name)) {
-      return "File name contains invalid characters";
-    }
-    return null;
-  };
-
-  const handleFileSelect = (file: File) => {
-    if (file) {
-      const validationError = validateFile(file);
-      if (validationError) {
-        setError(validationError);
-        return;
-      }
-      uploadFile(file);
-    }
-  };
-
-  const uploadFile = async (file: File) => {
-    if (!csrfToken) {
-      setError("Security token not available. Please refresh the page.");
-      return;
-    }
-
-    setUploading(true);
-    setError(null);
-    setUploadProgress(0);
-    setUploadComplete(false);
-
-    let blobPath = "";
-    //let uniqueFileName = "";
-
-    try {
-      const sasResponse = await fetch("/api/upload/sas", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRF-Token": csrfToken,
-        },
-        body: JSON.stringify({
-          fileName: file.name,
-          fileSize: file.size,
-          fileType: file.type,
-        }),
-      });
-
-      if (!sasResponse.ok) {
-        const errorData = await sasResponse.json();
-        throw new Error(errorData.error || "Failed to get upload URL");
-      }
-
-      const sasData = await sasResponse.json();
-      const { uploadUrl } = sasData;
-      blobPath = sasData.blobPath;
-      //uniqueFileName = sasData.uniqueFileName;
-
-      await new Promise<void>((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-
-        xhr.upload.addEventListener("progress", e => {
-          if (e.lengthComputable) {
-            const percentComplete = Math.round((e.loaded / e.total) * 95);
-            setUploadProgress(percentComplete);
-          }
-        });
-
-        xhr.addEventListener("load", () => {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            setUploadProgress(95);
-            resolve();
-          } else {
-            reject(new Error(`Upload failed with status: ${xhr.status}`));
-          }
-        });
-
-        xhr.addEventListener("error", () => {
-          reject(new Error("Network error during upload"));
-        });
-
-        xhr.addEventListener("abort", () => {
-          reject(new Error("Upload cancelled"));
-        });
-
-        xhr.open("PUT", uploadUrl, true);
-        xhr.setRequestHeader("x-ms-blob-type", "BlockBlob");
-        xhr.setRequestHeader("Content-Type", file.type);
-        xhr.send(file);
-      });
-
-      setUploadProgress(98);
-
-      const completeResponse = await fetch("/api/upload/complete", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRF-Token": csrfToken,
-        },
-        body: JSON.stringify({
-          blobPath,
-          originalFileName: file.name,
-        }),
-      });
-
-      if (!completeResponse.ok) {
-        const errorData = await completeResponse.json();
-        throw new Error(errorData.error || "Failed to complete upload");
-      }
-
-      setUploadProgress(100);
-      setUploadComplete(true);
-
-      setTimeout(() => {
-        onUploadSuccess();
-        handleClose();
-      }, 1500);
-    } catch (error) {
-      setError(error instanceof Error ? error.message : "Upload failed");
-      setUploadProgress(0);
-    } finally {
-      setTimeout(() => {
-        setUploading(false);
-      }, 1000);
-
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
-    }
-  };
+  const {
+    uploading,
+    uploadProgress,
+    uploadComplete,
+    error,
+    csrfToken,
+    csrfLoading,
+    fileInputRef,
+    handleFileSelect,
+    resetUpload,
+  } = useFileUpload({
+    onSuccess: () => {
+      onUploadSuccess();
+      setTimeout(handleClose, 1500);
+    },
+    showToast: false,
+  });
 
   const handleClose = () => {
     if (!uploading) {
-      setError(null);
-      setUploadProgress(0);
-      setUploadComplete(false);
+      resetUpload();
       onClose();
     }
   };
@@ -242,7 +106,6 @@ export function UploadModal({
             }}
           />
 
-          {/* Drop Zone */}
           <div
             className={cn(
               "relative border-2 border-dashed rounded-lg p-4 sm:p-8 text-center transition-all duration-200 min-h-[180px] sm:min-h-[200px] flex flex-col items-center justify-center",
@@ -321,13 +184,12 @@ export function UploadModal({
             )}
           </div>
 
-          {/* Error Display */}
           {error && (
             <div className="p-2 sm:p-3 bg-destructive/10 border border-destructive/20 rounded-lg flex items-center gap-2 text-xs sm:text-sm text-destructive">
               <AlertCircle className="w-4 h-4 flex-shrink-0" />
               <span className="flex-1 break-words">{error}</span>
               <button
-                onClick={() => setError(null)}
+                onClick={resetUpload}
                 className="text-destructive hover:text-destructive/80"
               >
                 <X className="w-4 h-4" />
@@ -335,7 +197,6 @@ export function UploadModal({
             </div>
           )}
 
-          {/* Action Buttons */}
           <div className="flex gap-2 pt-2 sm:pt-4">
             <Button
               variant="outline"

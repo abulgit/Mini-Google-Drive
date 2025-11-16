@@ -59,7 +59,6 @@ export function SigninModal({ isOpen, onClose }: SigninModalProps) {
           </Button>
 
           <div className="space-y-4">
-
             <div className="text-center space-y-3">
               <p className="text-sm text-muted-foreground leading-relaxed">
                 No credit card required • Secure with Google • Access anywhere
