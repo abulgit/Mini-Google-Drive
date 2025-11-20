@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
-import { useCSRFToken } from "@/hooks/useCSRFToken";
-import { SUCCESS_MESSAGES, ERROR_MESSAGES } from "@/lib/constants";
+import { useCSRFToken } from "@/hooks/auth/useCSRFToken";
+import { SUCCESS_MESSAGES, ERROR_MESSAGES } from "@/lib/config/constants";
 import type { FileDocument } from "@/types";
 
 export function useFileActions(

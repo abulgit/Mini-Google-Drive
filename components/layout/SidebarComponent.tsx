@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { cn, formatBytes } from "@/lib/utils";
+import { cn, formatBytes } from "@/lib/utils/utils";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -23,7 +23,7 @@ import {
   HelpCircle,
 } from "lucide-react";
 import { useEffect } from "react";
-import { useStorage } from "@/components/StorageContext";
+import { useStorage } from "@/components/providers/StorageContext";
 
 interface SidebarProps {
   className?: string;

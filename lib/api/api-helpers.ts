@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { authOptions } from "@/lib/auth/auth";
 import { ZodSchema, ZodError, ZodIssue } from "zod";
-import { ERROR_MESSAGES } from "@/lib/constants";
+import { ERROR_MESSAGES } from "@/lib/config/constants";
 
 export async function validateRequest<T>(
   schema: ZodSchema<T>,

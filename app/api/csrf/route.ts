@@ -1,11 +1,11 @@
 import { NextRequest } from "next/server";
-import { generateCSRFToken } from "@/lib/csrf";
+import { generateCSRFToken } from "@/lib/auth/csrf";
 import {
   getAuthenticatedUser,
   createErrorResponse,
   createSuccessResponse,
-} from "@/lib/api-helpers";
-import { ERROR_MESSAGES } from "@/lib/constants";
+} from "@/lib/api/api-helpers";
+import { ERROR_MESSAGES } from "@/lib/config/constants";
 
 export async function GET(request: NextRequest) {
   try {

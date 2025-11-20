@@ -4,8 +4,13 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { STORAGE_LIMIT, ALLOWED_EXTENSIONS } from "@/types";
-import { useFileUpload } from "@/hooks/useFileUpload";
-import { cn, formatBytes, formatSpeed, formatTimeRemaining } from "@/lib/utils";
+import { useFileUpload } from "@/hooks/files/useFileUpload";
+import {
+  cn,
+  formatBytes,
+  formatSpeed,
+  formatTimeRemaining,
+} from "@/lib/utils/utils";
 import { Upload, Cloud, Plus } from "lucide-react";
 
 interface FileUploadProps {

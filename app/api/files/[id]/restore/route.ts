@@ -1,14 +1,14 @@
 import { NextRequest } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
-import { validateCSRFToken, createCSRFError } from "@/lib/csrf-middleware";
+import { connectToDatabase } from "@/lib/services/mongodb";
+import { validateCSRFToken, createCSRFError } from "@/lib/auth/csrf-middleware";
 import {
   getAuthenticatedUser,
   validateRequest,
   createErrorResponse,
   createSuccessResponse,
-} from "@/lib/api-helpers";
-import { fileIdSchema } from "@/lib/validations";
-import { COLLECTIONS, ERROR_MESSAGES } from "@/lib/constants";
+} from "@/lib/api/api-helpers";
+import { fileIdSchema } from "@/lib/utils/validations";
+import { COLLECTIONS, ERROR_MESSAGES } from "@/lib/config/constants";
 import { ObjectId } from "mongodb";
 import type { FileDocument } from "@/types";
 

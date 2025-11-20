@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import { useStorage } from "@/components/StorageContext";
-import { useRequireAuth } from "@/hooks/useRequireAuth";
+import { useStorage } from "@/components/providers/StorageContext";
+import { useRequireAuth } from "@/hooks/auth/useRequireAuth";
 import type { FileDocument } from "@/types";
 
 interface UseDashboardPageOptions {

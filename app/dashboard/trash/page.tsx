@@ -1,8 +1,8 @@
 "use client";
 
-import { DashboardLayout } from "@/components/DashboardLayout";
-import { LoadingScreen } from "@/components/LoadingScreen";
-import { useDashboardPage } from "@/hooks/useDashboardPage";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { LoadingScreen } from "@/components/common/LoadingScreen";
+import { useDashboardPage } from "@/hooks/dashboard/useDashboardPage";
 
 export default function TrashPage() {
   const {
