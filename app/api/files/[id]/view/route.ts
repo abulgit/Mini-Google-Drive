@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { connectToDatabase } from "@/lib/services/mongodb";
-import { generateDownloadUrl } from "@/lib/services/azure-storage";
+import { generateViewUrl } from "@/lib/services/azure-storage";
 import {
   getAuthenticatedUser,
   validateRequest,
@@ -40,15 +40,11 @@ export async function GET(
       return createErrorResponse(ERROR_MESSAGES.FILE_NOT_FOUND, 404);
     }
 
-    const downloadUrl = await generateDownloadUrl(
-      user!.id,
-      file.fileName,
-      file.originalFileName
-    );
+    const viewUrl = await generateViewUrl(user!.id, file.fileName);
 
-    return createSuccessResponse({ downloadUrl });
+    return createSuccessResponse({ viewUrl });
   } catch (error) {
-    console.error("Download error:", error);
-    return createErrorResponse(ERROR_MESSAGES.DOWNLOAD_FAILED, 500);
+    console.error("View error:", error);
+    return createErrorResponse("Failed to generate view URL", 500);
   }
 }

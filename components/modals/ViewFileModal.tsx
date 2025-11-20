@@ -32,10 +32,10 @@ export function ViewFileModal({ file, isOpen, onClose }: ViewFileModalProps) {
 
     setLoading(true);
     try {
-      const response = await fetch(`/api/files/${file._id}/download`);
+      const response = await fetch(`/api/files/${file._id}/view`);
       if (response.ok) {
         const data = await response.json();
-        setFileUrl(data.downloadUrl);
+        setFileUrl(data.viewUrl);
       } else {
         toast.error("Failed to load file");
       }
@@ -55,9 +55,27 @@ export function ViewFileModal({ file, isOpen, onClose }: ViewFileModalProps) {
     }
   }, [file, isOpen, fetchFileUrl]);
 
-  const handleDownload = () => {
-    if (fileUrl) {
-      window.open(fileUrl, "_blank");
+  const handleDownload = async () => {
+    if (!file) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/files/${file._id}/download`);
+      if (response.ok) {
+        const data = await response.json();
+        const link = document.createElement("a");
+        link.href = data.downloadUrl;
+        link.download = file.originalFileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        toast.error("Failed to download file");
+      }
+    } catch (error) {
+      console.error("Download error:", error);
+      toast.error("Failed to download file");
     }
   };
 

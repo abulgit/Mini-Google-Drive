@@ -21,10 +21,7 @@ const containerName = process.env.AZURE_STORAGE_CONTAINER_NAME || "user-files";
 export async function getContainerClient(): Promise<ContainerClient> {
   const containerClient = blobServiceClient.getContainerClient(containerName);
 
-  // Ensure container exists
-  await containerClient.createIfNotExists({
-    access: "blob",
-  });
+  await containerClient.createIfNotExists();
 
   return containerClient;
 }
@@ -59,15 +56,62 @@ export async function deleteFileFromBlob(
   await blockBlobClient.deleteIfExists();
 }
 
-export async function generateDownloadUrl(
+export async function generateViewUrl(
   userId: string,
-  fileName: string
+  fileName: string,
+  expiryHours: number = 2
 ): Promise<string> {
   const containerClient = await getContainerClient();
   const blobName = `${userId}/${fileName}`;
   const blockBlobClient = containerClient.getBlockBlobClient(blobName);
 
-  return blockBlobClient.url;
+  const sharedKeyCredential = getSharedKeyCredential();
+
+  const startsOn = new Date();
+  const expiresOn = new Date(startsOn.getTime() + expiryHours * 60 * 60 * 1000);
+
+  const sasToken = generateBlobSASQueryParameters(
+    {
+      containerName: containerClient.containerName,
+      blobName,
+      permissions: BlobSASPermissions.parse("r"),
+      startsOn,
+      expiresOn,
+    },
+    sharedKeyCredential
+  ).toString();
+
+  return `${blockBlobClient.url}?${sasToken}`;
+}
+
+export async function generateDownloadUrl(
+  userId: string,
+  fileName: string,
+  originalFileName: string,
+  expiryMinutes: number = 10
+): Promise<string> {
+  const containerClient = await getContainerClient();
+  const blobName = `${userId}/${fileName}`;
+  const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+
+  const sharedKeyCredential = getSharedKeyCredential();
+
+  const startsOn = new Date();
+  const expiresOn = new Date(startsOn.getTime() + expiryMinutes * 60 * 1000);
+
+  const sasToken = generateBlobSASQueryParameters(
+    {
+      containerName: containerClient.containerName,
+      blobName,
+      permissions: BlobSASPermissions.parse("r"),
+      startsOn,
+      expiresOn,
+      contentDisposition: `attachment; filename="${originalFileName}"`,
+    },
+    sharedKeyCredential
+  ).toString();
+
+  return `${blockBlobClient.url}?${sasToken}`;
 }
 
 function getSharedKeyCredential(): StorageSharedKeyCredential {
@@ -102,7 +146,7 @@ export async function generatePresignedUploadUrl(
 
   const sasToken = generateBlobSASQueryParameters(
     {
-      containerName,
+      containerName: containerClient.containerName,
       blobName,
       permissions: BlobSASPermissions.parse("w"),
       startsOn,
