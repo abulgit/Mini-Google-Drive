@@ -1,15 +1,18 @@
 import { NextRequest } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
-import { validateCSRFToken, createCSRFError } from "@/lib/csrf-middleware";
-import { verifyBlobExists, getBlobProperties } from "@/lib/azure-storage";
+import { connectToDatabase } from "@/lib/services/mongodb";
+import { validateCSRFToken, createCSRFError } from "@/lib/auth/csrf-middleware";
+import {
+  verifyBlobExists,
+  getBlobProperties,
+} from "@/lib/services/azure-storage";
 import {
   getAuthenticatedUser,
   validateRequest,
   createErrorResponse,
   createSuccessResponse,
   parseRequestBody,
-} from "@/lib/api-helpers";
-import { COLLECTIONS, ERROR_MESSAGES } from "@/lib/constants";
+} from "@/lib/api/api-helpers";
+import { COLLECTIONS, ERROR_MESSAGES } from "@/lib/config/constants";
 import { z } from "zod";
 import { type FileDocument, type User } from "@/types";
 

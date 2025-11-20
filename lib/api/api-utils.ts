@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import { ERROR_MESSAGES } from "@/lib/constants";
+import { authOptions } from "@/lib/auth/auth";
+import { ERROR_MESSAGES } from "@/lib/config/constants";
 
 export interface AuthenticatedRequest extends NextRequest {
   userId?: string;

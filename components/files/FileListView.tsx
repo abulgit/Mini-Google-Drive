@@ -1,12 +1,12 @@
 import { Badge } from "@/components/ui/badge";
-import { formatBytes, formatDate } from "@/lib/utils";
+import { formatBytes, formatDate } from "@/lib/utils/utils";
 import {
   getFileIcon,
   getFileTypeColor,
   getFileExtension,
-} from "@/lib/file-utils";
-import { FileDropdownMenu } from "@/components/FileDropdownMenu";
-import { FileViewToggle } from "@/components/FileViewToggle";
+} from "@/lib/utils/file-utils";
+import { FileDropdownMenu } from "@/components/files/FileDropdownMenu";
+import { FileViewToggle } from "@/components/files/FileViewToggle";
 import type { FileDocument } from "@/types";
 
 interface FileListViewProps {

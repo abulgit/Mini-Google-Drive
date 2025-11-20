@@ -1,8 +1,8 @@
 import { useState, useRef } from "react";
 import { toast } from "sonner";
 import { STORAGE_LIMIT, validateFileType } from "@/types";
-import { useCSRFToken } from "@/hooks/useCSRFToken";
-import { formatBytes } from "@/lib/utils";
+import { useCSRFToken } from "@/hooks/auth/useCSRFToken";
+import { formatBytes } from "@/lib/utils/utils";
 
 interface UseFileUploadOptions {
   onSuccess: () => void;

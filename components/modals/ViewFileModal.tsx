@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { formatBytes } from "@/lib/utils";
+import { formatBytes } from "@/lib/utils/utils";
 import type { FileDocument } from "@/types";
 
 interface ViewFileModalProps {

@@ -1,11 +1,11 @@
 import { NextRequest } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
+import { connectToDatabase } from "@/lib/services/mongodb";
 import {
   getAuthenticatedUser,
   createErrorResponse,
   createSuccessResponse,
-} from "@/lib/api-helpers";
-import { COLLECTIONS, ERROR_MESSAGES } from "@/lib/constants";
+} from "@/lib/api/api-helpers";
+import { COLLECTIONS, ERROR_MESSAGES } from "@/lib/config/constants";
 import { STORAGE_LIMIT, type User, type StorageUsage } from "@/types";
 
 export async function GET(request: NextRequest) {

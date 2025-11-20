@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { ViewFileModal } from "@/components/ViewFileModal";
-import { FileEmptyState } from "@/components/FileEmptyState";
-import { FileListView } from "@/components/FileListView";
-import { FileGridView } from "@/components/FileGridView";
-import { FileDeleteDialog } from "@/components/FileDeleteDialog";
-import { FileRenameDialog } from "@/components/FileRenameDialog";
-import { useFileActions } from "@/hooks/useFileActions";
+import { ViewFileModal } from "@/components/modals/ViewFileModal";
+import { FileEmptyState } from "@/components/files/FileEmptyState";
+import { FileListView } from "@/components/files/FileListView";
+import { FileGridView } from "@/components/files/FileGridView";
+import { FileDeleteDialog } from "@/components/modals/FileDeleteDialog";
+import { FileRenameDialog } from "@/components/modals/FileRenameDialog";
+import { useFileActions } from "@/hooks/files/useFileActions";
 import type { FileDocument } from "@/types";
 
 interface FileDisplayProps {
