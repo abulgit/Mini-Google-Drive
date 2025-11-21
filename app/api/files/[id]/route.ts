@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { connectToDatabase } from "@/lib/services/mongodb";
 import { validateCSRFToken, createCSRFError } from "@/lib/auth/csrf-middleware";
+import { logActivity } from "@/lib/services/activity-logger";
 import {
   getAuthenticatedUser,
   validateRequest,
@@ -46,20 +47,39 @@ export async function PATCH(
 
     const { db } = await connectToDatabase();
 
-    const result = await db
-      .collection<FileDocument>(COLLECTIONS.FILES)
-      .updateOne(
-        {
-          _id: new ObjectId(id),
-          userId: user!.id,
-        },
-        {
-          $set: validation.data,
-        }
-      );
+    const file = await db.collection<FileDocument>(COLLECTIONS.FILES).findOne({
+      _id: new ObjectId(id),
+      userId: user!.id,
+    });
 
-    if (result.matchedCount === 0) {
+    if (!file) {
       return createErrorResponse(ERROR_MESSAGES.FILE_NOT_FOUND, 404);
+    }
+
+    await db.collection<FileDocument>(COLLECTIONS.FILES).updateOne(
+      {
+        _id: new ObjectId(id),
+        userId: user!.id,
+      },
+      {
+        $set: validation.data,
+      }
+    );
+
+    if (
+      validation.data.originalFileName &&
+      validation.data.originalFileName !== file.originalFileName
+    ) {
+      await logActivity({
+        userId: user!.id,
+        fileId: file._id!,
+        action: "rename",
+        fileName: validation.data.originalFileName,
+        metadata: {
+          oldName: file.originalFileName,
+          newName: validation.data.originalFileName,
+        },
+      });
     }
 
     return createSuccessResponse({ success: true, ...validation.data });
@@ -108,6 +128,13 @@ export async function DELETE(
         $set: { deletedAt: new Date() },
       }
     );
+
+    await logActivity({
+      userId: user!.id,
+      fileId: file._id!,
+      action: "delete",
+      fileName: file.originalFileName,
+    });
 
     return createSuccessResponse({
       success: true,

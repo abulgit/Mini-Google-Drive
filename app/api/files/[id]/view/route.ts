@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { connectToDatabase } from "@/lib/services/mongodb";
 import { generateViewUrl } from "@/lib/services/azure-storage";
+import { logActivity } from "@/lib/services/activity-logger";
 import {
   getAuthenticatedUser,
   validateRequest,
@@ -41,6 +42,13 @@ export async function GET(
     }
 
     const viewUrl = await generateViewUrl(user!.id, file.fileName);
+
+    await logActivity({
+      userId: user!.id,
+      fileId: file._id!,
+      action: "view",
+      fileName: file.originalFileName,
+    });
 
     return createSuccessResponse({ viewUrl });
   } catch (error) {

@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { connectToDatabase } from "@/lib/services/mongodb";
 import { generateDownloadUrl } from "@/lib/services/azure-storage";
+import { logActivity } from "@/lib/services/activity-logger";
 import {
   getAuthenticatedUser,
   validateRequest,
@@ -45,6 +46,13 @@ export async function GET(
       file.fileName,
       file.originalFileName
     );
+
+    await logActivity({
+      userId: user!.id,
+      fileId: file._id!,
+      action: "download",
+      fileName: file.originalFileName,
+    });
 
     return createSuccessResponse({ downloadUrl });
   } catch (error) {

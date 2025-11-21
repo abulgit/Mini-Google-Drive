@@ -26,6 +26,27 @@ export interface FileDocument {
   deletedAt?: Date; // When the file was moved to trash (soft delete)
 }
 
+export type ActivityAction =
+  | "upload"
+  | "view"
+  | "download"
+  | "rename"
+  | "delete"
+  | "restore";
+
+export interface ActivityLog {
+  _id?: ObjectId;
+  userId: string;
+  fileId: ObjectId;
+  action: ActivityAction;
+  fileName: string;
+  metadata?: {
+    oldName?: string;
+    newName?: string;
+  };
+  timestamp: Date;
+}
+
 // File upload response type
 export interface FileUploadResponse {
   success: boolean;

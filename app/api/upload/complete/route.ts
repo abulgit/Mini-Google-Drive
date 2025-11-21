@@ -5,6 +5,7 @@ import {
   verifyBlobExists,
   getBlobProperties,
 } from "@/lib/services/azure-storage";
+import { logActivity } from "@/lib/services/activity-logger";
 import {
   getAuthenticatedUser,
   validateRequest,
@@ -108,6 +109,13 @@ export async function POST(request: NextRequest) {
         $set: { updatedAt: new Date() },
       }
     );
+
+    await logActivity({
+      userId: user!.id,
+      fileId: result.insertedId,
+      action: "upload",
+      fileName: originalFileName,
+    });
 
     return createSuccessResponse({
       success: true,

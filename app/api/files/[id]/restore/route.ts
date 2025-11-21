@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { connectToDatabase } from "@/lib/services/mongodb";
 import { validateCSRFToken, createCSRFError } from "@/lib/auth/csrf-middleware";
+import { logActivity } from "@/lib/services/activity-logger";
 import {
   getAuthenticatedUser,
   validateRequest,
@@ -51,6 +52,13 @@ export async function PATCH(
         $unset: { deletedAt: "" },
       }
     );
+
+    await logActivity({
+      userId: user!.id,
+      fileId: file._id!,
+      action: "restore",
+      fileName: file.originalFileName,
+    });
 
     return createSuccessResponse({
       success: true,

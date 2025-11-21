@@ -21,6 +21,7 @@ import {
   Plus,
   Settings,
   HelpCircle,
+  Activity,
 } from "lucide-react";
 import { useEffect } from "react";
 import { useStorage } from "@/components/providers/StorageContext";
@@ -42,6 +43,9 @@ export function Sidebar({ className, onNewClick }: SidebarProps) {
     }
     if (pathname === "/dashboard/recent") {
       return "recent";
+    }
+    if (pathname === "/dashboard/activity") {
+      return "activity";
     }
     if (pathname === "/dashboard/trash") {
       return "trash";
@@ -69,6 +73,10 @@ export function Sidebar({ className, onNewClick }: SidebarProps) {
         router.push("/dashboard/starred");
         break;
       case "recent":
+        router.push("/dashboard/recent");
+        break;
+      case "activity":
+        router.push("/dashboard/activity");
         break;
       case "trash":
         router.push("/dashboard/trash");
@@ -93,6 +101,12 @@ export function Sidebar({ className, onNewClick }: SidebarProps) {
       id: "starred",
       label: "Starred",
       icon: Star,
+      count: null,
+    },
+    {
+      id: "activity",
+      label: "Activity",
+      icon: Activity,
       count: null,
     },
     {
