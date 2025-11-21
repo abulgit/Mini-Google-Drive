@@ -15,7 +15,11 @@ export default function RecentPage() {
     handleUploadSuccess,
     handleFileAction,
     handleNewClick,
-  } = useDashboardPage({ endpoint: "/api/files/recent" });
+    pagination,
+    goToNextPage,
+    goToPreviousPage,
+    goToPage,
+  } = useDashboardPage({ endpoint: "/api/files/recent", pageSize: 12 });
 
   if (status === "loading") {
     return <LoadingScreen />;
@@ -36,6 +40,10 @@ export default function RecentPage() {
       onFileAction={handleFileAction}
       onNewClick={handleNewClick}
       loadingMessage="Loading recent files..."
+      pagination={pagination}
+      onNextPage={goToNextPage}
+      onPreviousPage={goToPreviousPage}
+      onGoToPage={goToPage}
     />
   );
 }

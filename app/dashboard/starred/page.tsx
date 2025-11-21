@@ -15,7 +15,11 @@ export default function StarredPage() {
     handleUploadSuccess,
     handleFileAction,
     handleNewClick,
-  } = useDashboardPage({ endpoint: "/api/files/starred" });
+    pagination,
+    goToNextPage,
+    goToPreviousPage,
+    goToPage,
+  } = useDashboardPage({ endpoint: "/api/files/starred", pageSize: 12 });
 
   if (status === "loading") {
     return <LoadingScreen />;
@@ -36,6 +40,10 @@ export default function StarredPage() {
       onFileAction={handleFileAction}
       onNewClick={handleNewClick}
       loadingMessage="Loading starred files..."
+      pagination={pagination}
+      onNextPage={goToNextPage}
+      onPreviousPage={goToPreviousPage}
+      onGoToPage={goToPage}
     />
   );
 }

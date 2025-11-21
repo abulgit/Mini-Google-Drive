@@ -15,7 +15,11 @@ export default function TrashPage() {
     handleUploadSuccess,
     handleFileAction,
     handleNewClick,
-  } = useDashboardPage({ endpoint: "/api/files/trash" });
+    pagination,
+    goToNextPage,
+    goToPreviousPage,
+    goToPage,
+  } = useDashboardPage({ endpoint: "/api/files/trash", pageSize: 25 });
 
   if (status === "loading") {
     return <LoadingScreen />;
@@ -36,6 +40,10 @@ export default function TrashPage() {
       onFileAction={handleFileAction}
       onNewClick={handleNewClick}
       loadingMessage="Loading trash files..."
+      pagination={pagination}
+      onNextPage={goToNextPage}
+      onPreviousPage={goToPreviousPage}
+      onGoToPage={goToPage}
     />
   );
 }

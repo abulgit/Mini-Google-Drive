@@ -5,7 +5,15 @@ import { DashboardHeader } from "@/components/layout/DashboardHeader";
 import { Sidebar } from "@/components/layout/SidebarComponent";
 import { FileDisplay } from "@/components/files/FileDisplay";
 import { UploadModal } from "@/components/modals/UploadModal";
+import { PaginationControls } from "@/components/common/PaginationControls";
 import type { FileDocument } from "@/types";
+
+interface PaginationMetadata {
+  currentPage: number;
+  totalPages: number;
+  totalCount: number;
+  limit: number;
+}
 
 interface DashboardLayoutProps {
   files: FileDocument[];
@@ -17,6 +25,10 @@ interface DashboardLayoutProps {
   onFileAction: () => void;
   onNewClick: () => void;
   loadingMessage?: string;
+  pagination?: PaginationMetadata;
+  onNextPage?: () => void;
+  onPreviousPage?: () => void;
+  onGoToPage?: (page: number) => void;
 }
 
 export function DashboardLayout({
@@ -29,6 +41,10 @@ export function DashboardLayout({
   onFileAction,
   onNewClick,
   loadingMessage = "Loading files...",
+  pagination,
+  onNextPage,
+  onPreviousPage,
+  onGoToPage,
 }: DashboardLayoutProps) {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
@@ -71,12 +87,25 @@ export function DashboardLayout({
                   <p className="mt-4 text-muted-foreground">{loadingMessage}</p>
                 </div>
               ) : (
-                <FileDisplay
-                  mode={mode}
-                  files={files}
-                  onFileDeleted={onFileAction}
-                  onFileUpdated={onFileAction}
-                />
+                <>
+                  <FileDisplay
+                    mode={mode}
+                    files={files}
+                    onFileDeleted={onFileAction}
+                    onFileUpdated={onFileAction}
+                  />
+                  {pagination && onNextPage && onPreviousPage && onGoToPage && (
+                    <PaginationControls
+                      currentPage={pagination.currentPage}
+                      totalPages={pagination.totalPages}
+                      totalCount={pagination.totalCount}
+                      pageSize={pagination.limit}
+                      onNextPage={onNextPage}
+                      onPreviousPage={onPreviousPage}
+                      onGoToPage={onGoToPage}
+                    />
+                  )}
+                </>
               )}
             </div>
           </main>

@@ -6,35 +6,75 @@ import { LoadingScreen } from "@/components/common/LoadingScreen";
 import { DashboardHeader } from "@/components/layout/DashboardHeader";
 import { Sidebar } from "@/components/layout/SidebarComponent";
 import { ActivityList } from "@/components/activity/ActivityList";
+import { Button } from "@/components/ui/button";
 import type { ActivityLog } from "@/types";
+
+interface PaginationMetadata {
+  currentPage: number;
+  totalPages: number;
+  totalCount: number;
+  limit: number;
+}
 
 export default function ActivityPage() {
   const { session, status, isAuthenticated } = useRequireAuth();
   const [activities, setActivities] = useState<ActivityLog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState<PaginationMetadata>({
+    currentPage: 1,
+    totalPages: 1,
+    totalCount: 0,
+    limit: 7,
+  });
 
-  const fetchActivities = useCallback(async () => {
-    try {
-      const response = await fetch("/api/activity");
-      if (response.ok) {
-        const data = await response.json();
-        setActivities(data.activities);
+  const fetchActivities = useCallback(
+    async (page: number = 1, append: boolean = false) => {
+      if (append) {
+        setLoadingMore(true);
+      } else {
+        setLoading(true);
       }
-    } catch (error) {
-      console.error("Failed to fetch activities:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+      try {
+        const response = await fetch(`/api/activity?page=${page}&limit=7`);
+        if (response.ok) {
+          const data = await response.json();
+          if (append) {
+            setActivities(prev => [...prev, ...data.activities]);
+          } else {
+            setActivities(data.activities);
+          }
+          if (data.pagination) {
+            setPagination(data.pagination);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch activities:", error);
+      } finally {
+        setLoading(false);
+        setLoadingMore(false);
+      }
+    },
+    []
+  );
 
   useEffect(() => {
     if (status === "loading" || !isAuthenticated) {
       return;
     }
 
-    fetchActivities();
+    fetchActivities(1, false);
   }, [status, isAuthenticated, fetchActivities]);
+
+  const loadMore = () => {
+    const nextPage = currentPage + 1;
+    setCurrentPage(nextPage);
+    fetchActivities(nextPage, true);
+  };
+
+  const hasMore = currentPage < pagination.totalPages;
 
   if (status === "loading") {
     return <LoadingScreen />;
@@ -81,6 +121,18 @@ export default function ActivityPage() {
                 </p>
               </div>
               <ActivityList activities={activities} loading={loading} />
+              {!loading && hasMore && (
+                <div className="flex justify-center mt-6">
+                  <Button
+                    onClick={loadMore}
+                    disabled={loadingMore}
+                    variant="outline"
+                    size="lg"
+                  >
+                    {loadingMore ? "Loading..." : "Load More"}
+                  </Button>
+                </div>
+              )}
             </div>
           </main>
         </div>

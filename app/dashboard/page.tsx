@@ -15,7 +15,11 @@ export default function DashboardPage() {
     handleUploadSuccess,
     handleFileAction,
     handleNewClick,
-  } = useDashboardPage({ endpoint: "/api/files" });
+    pagination,
+    goToNextPage,
+    goToPreviousPage,
+    goToPage,
+  } = useDashboardPage({ endpoint: "/api/files", pageSize: 18 });
 
   if (status === "loading") {
     return <LoadingScreen />;
@@ -36,6 +40,10 @@ export default function DashboardPage() {
       onFileAction={handleFileAction}
       onNewClick={handleNewClick}
       loadingMessage="Loading files..."
+      pagination={pagination}
+      onNextPage={goToNextPage}
+      onPreviousPage={goToPreviousPage}
+      onGoToPage={goToPage}
     />
   );
 }

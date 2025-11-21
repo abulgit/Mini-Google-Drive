@@ -15,16 +15,37 @@ export async function GET(request: NextRequest) {
       return error;
     }
 
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get("page") || "1", 10);
+    const limit = parseInt(searchParams.get("limit") || "7", 10);
+    const skip = (page - 1) * limit;
+
     const { db } = await connectToDatabase();
 
-    const activities = await db
-      .collection<ActivityLog>(COLLECTIONS.ACTIVITIES)
-      .find({ userId: user!.id })
-      .sort({ timestamp: -1 })
-      .limit(100)
-      .toArray();
+    const query = { userId: user!.id };
 
-    return createSuccessResponse({ activities });
+    const [activities, totalCount] = await Promise.all([
+      db
+        .collection<ActivityLog>(COLLECTIONS.ACTIVITIES)
+        .find(query)
+        .sort({ timestamp: -1 })
+        .skip(skip)
+        .limit(limit)
+        .toArray(),
+      db.collection<ActivityLog>(COLLECTIONS.ACTIVITIES).countDocuments(query),
+    ]);
+
+    const totalPages = Math.ceil(totalCount / limit);
+
+    return createSuccessResponse({
+      activities,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalCount,
+        limit,
+      },
+    });
   } catch (error) {
     console.error("Activity fetch error:", error);
     return createErrorResponse(ERROR_MESSAGES.INTERNAL_ERROR, 500);
