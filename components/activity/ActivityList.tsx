@@ -8,6 +8,7 @@ import {
   Clock,
 } from "lucide-react";
 import { formatRelativeTime } from "@/lib/utils/utils";
+import { ActivitySkeleton } from "@/components/common/DashboardSkeleton";
 import type { ActivityLog, ActivityAction } from "@/types";
 
 interface ActivityListProps {
@@ -94,13 +95,7 @@ function getActivityText(activity: ActivityLog) {
 
 export function ActivityList({ activities, loading }: ActivityListProps) {
   if (loading) {
-    return (
-      <div className="bg-card rounded-lg border border-border p-8">
-        <div className="flex items-center justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-        </div>
-      </div>
-    );
+    return <ActivitySkeleton />;
   }
 
   if (activities.length === 0) {

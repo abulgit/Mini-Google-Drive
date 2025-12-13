@@ -1,6 +1,7 @@
 "use client";
 
 import { signIn } from "next-auth/react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -22,22 +23,41 @@ export function SigninModal({ isOpen, onClose }: SigninModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md border-zinc-200 dark:border-zinc-800">
         <DialogHeader>
-          <DialogTitle className="text-center">Welcome back</DialogTitle>
-          <DialogDescription className="text-center">
-            Sign in with Google to access your secure cloud storage
-          </DialogDescription>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1, duration: 0.3 }}
+          >
+            <DialogTitle className="text-center text-2xl font-semibold tracking-tight">
+              Welcome back
+            </DialogTitle>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15, duration: 0.3 }}
+          >
+            <DialogDescription className="text-center">
+              Sign in with Google to access your secure cloud storage
+            </DialogDescription>
+          </motion.div>
         </DialogHeader>
 
-        <div className="space-y-8">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.3 }}
+          className="space-y-6 pt-4"
+        >
           <Button
             onClick={handleGoogleSignIn}
             variant="outline"
             size="lg"
-            className="w-full h-14 text-base font-semibold border-2 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-[1.02] dark:border-border dark:bg-card dark:text-card-foreground dark:hover:bg-muted"
+            className="w-full h-14 text-base font-medium border-2 border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-600 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
           >
-            <svg className="w-6 h-6 mr-3" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
               <path
                 fill="#4285F4"
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -48,7 +68,7 @@ export function SigninModal({ isOpen, onClose }: SigninModalProps) {
               />
               <path
                 fill="#FBBC05"
-                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
               />
               <path
                 fill="#EA4335"
@@ -58,14 +78,17 @@ export function SigninModal({ isOpen, onClose }: SigninModalProps) {
             Continue with Google
           </Button>
 
-          <div className="space-y-4">
-            <div className="text-center space-y-3">
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                No credit card required • Secure with Google • Access anywhere
-              </p>
-            </div>
-          </div>
-        </div>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3, duration: 0.3 }}
+            className="text-center"
+          >
+            <p className="text-xs text-zinc-400">
+              No credit card required • Secure with Google • Access anywhere
+            </p>
+          </motion.div>
+        </motion.div>
       </DialogContent>
     </Dialog>
   );

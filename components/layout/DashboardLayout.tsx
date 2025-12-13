@@ -7,6 +7,7 @@ import { FileDisplay } from "@/components/files/FileDisplay";
 import { UploadModal } from "@/components/modals/UploadModal";
 import { ViewFileModal } from "@/components/modals/ViewFileModal";
 import { PaginationControls } from "@/components/common/PaginationControls";
+import { DashboardSkeleton } from "@/components/common/DashboardSkeleton";
 import type { FileDocument } from "@/types";
 
 interface PaginationMetadata {
@@ -98,10 +99,7 @@ export function DashboardLayout({
           <main className="flex-1 overflow-auto">
             <div className="p-3 sm:p-4 md:p-6">
               {loading ? (
-                <div className="flex flex-col items-center justify-center py-16">
-                  <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-                  <p className="mt-4 text-muted-foreground">{loadingMessage}</p>
-                </div>
+                <DashboardSkeleton />
               ) : (
                 <>
                   <FileDisplay

@@ -2,7 +2,61 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { Activity, Copy, File, RotateCcw, Search, Trash2 } from "lucide-react";
+import {
+  Activity,
+  Copy,
+  Eye,
+  File,
+  FileEdit,
+  RotateCcw,
+  Search,
+  Share2,
+  Trash2,
+  Upload,
+} from "lucide-react";
+
+type ActivityType = "viewed" | "renamed" | "uploaded" | "deleted" | "shared";
+
+interface ActivityItem {
+  type: ActivityType;
+  fileName: string;
+  renamedTo?: string;
+  time: string;
+}
+
+const activityData: ActivityItem[] = [
+  { type: "shared", fileName: "project_roadmap.docx", time: "5 hours ago" },
+  {
+    type: "uploaded",
+    fileName: "presentation_final.pptx",
+    time: "3 hours ago",
+  },
+  {
+    type: "renamed",
+    fileName: "IMG_20241201.png",
+    renamedTo: "team_photo.png",
+    time: "1 hour ago",
+  },
+  { type: "deleted", fileName: "old_backup_2023.zip", time: "15 min ago" },
+  { type: "viewed", fileName: "Q4_Financial_Report.pdf", time: "2 min ago" },
+];
+
+const getActivityIcon = (type: ActivityType) => {
+  switch (type) {
+    case "viewed":
+      return Eye;
+    case "renamed":
+      return FileEdit;
+    case "uploaded":
+      return Upload;
+    case "deleted":
+      return Trash2;
+    case "shared":
+      return Share2;
+    default:
+      return Eye;
+  }
+};
 
 export function FeaturesGrid() {
   return (
@@ -31,40 +85,118 @@ export function FeaturesGrid() {
   );
 }
 
+function ActivityRow({ item }: { item: ActivityItem }) {
+  const Icon = getActivityIcon(item.type);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: -100 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
+      layout
+      className="flex items-center gap-3 px-4 h-[52px] border-b border-zinc-200 dark:border-zinc-800 last:border-0"
+    >
+      <div className="flex-shrink-0">
+        <Icon className="h-4 w-4 text-zinc-400 dark:text-zinc-500" />
+      </div>
+      <div className="flex-1 min-w-0 overflow-hidden">
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, ease: "easeOut", delay: 0.1 }}
+          className="text-sm truncate leading-tight whitespace-nowrap"
+        >
+          {item.type === "renamed" ? (
+            <>
+              <span className="text-zinc-900 dark:text-zinc-100">Renamed</span>{" "}
+              <span className="text-zinc-500 dark:text-zinc-400">
+                {item.fileName}
+              </span>{" "}
+              <span className="text-zinc-900 dark:text-zinc-100">to</span>{" "}
+              <span className="text-zinc-500 dark:text-zinc-400">
+                {item.renamedTo}
+              </span>
+            </>
+          ) : (
+            <>
+              <span className="text-zinc-900 dark:text-zinc-100 capitalize">
+                {item.type}
+              </span>{" "}
+              <span className="text-zinc-500 dark:text-zinc-400">
+                {item.fileName}
+              </span>
+            </>
+          )}
+        </motion.p>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3, delay: 0.3 }}
+          className="text-[11px] text-zinc-400 dark:text-zinc-600"
+        >
+          {item.time}
+        </motion.p>
+      </div>
+    </motion.div>
+  );
+}
+
+interface VisibleItem extends ActivityItem {
+  id: number;
+}
+
 function ActivityCard() {
   const [isActive, setIsActive] = useState(false);
-  const [showTooltip, setShowTooltip] = useState(false);
+  const [visibleItems, setVisibleItems] = useState<VisibleItem[]>([]);
   const cardRef = useRef<HTMLDivElement>(null);
+  const idCounterRef = useRef(0);
+  const ROW_HEIGHT = 52;
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
+        if (entry.isIntersecting && !isActive) {
           setIsActive(true);
         }
       },
-      { threshold: 0.5 }
+      { threshold: 0.3 }
     );
 
     if (cardRef.current) observer.observe(cardRef.current);
     return () => observer.disconnect();
-  }, []);
+  }, [isActive]);
 
   useEffect(() => {
     if (!isActive) return;
 
-    const showTimer = setTimeout(() => setShowTooltip(true), 800);
-    const hideTimer = setTimeout(() => setShowTooltip(false), 3000);
-    const loopTimer = setInterval(() => {
-      setShowTooltip(true);
-      setTimeout(() => setShowTooltip(false), 2200);
-    }, 4000);
+    let currentIndex = 0;
+    let timeoutId: NodeJS.Timeout;
 
-    return () => {
-      clearTimeout(showTimer);
-      clearTimeout(hideTimer);
-      clearInterval(loopTimer);
+    const addNextItem = () => {
+      if (currentIndex < activityData.length) {
+        const baseItem = activityData[currentIndex];
+        const newItem: VisibleItem = {
+          ...baseItem,
+          id: idCounterRef.current++,
+        };
+        setVisibleItems(prev =>
+          [newItem, ...prev].slice(0, activityData.length)
+        );
+        currentIndex++;
+        timeoutId = setTimeout(addNextItem, 900);
+      } else {
+        // All items shown, wait then reset and start again
+        timeoutId = setTimeout(() => {
+          setVisibleItems([]);
+          currentIndex = 0;
+          timeoutId = setTimeout(addNextItem, 400);
+        }, 2000);
+      }
     };
+
+    timeoutId = setTimeout(addNextItem, 400);
+
+    return () => clearTimeout(timeoutId);
   }, [isActive]);
 
   return (
@@ -79,70 +211,20 @@ function ActivityCard() {
         </span>
       </div>
       <h3 className="mt-6 text-2xl font-medium tracking-tight text-zinc-900 dark:text-zinc-100">
-        Total visibility.
+        Track everything.
       </h3>
       <p className="mt-2 text-zinc-500">
-        Track every movement. See who viewed, downloaded, or modified a file in
-        real-time.
+        See every file action — views, uploads, renames, and deletions — all in
+        one timeline.
       </p>
 
-      <div className="mt-8 border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 p-4">
-        <div className="space-y-0">
-          {[
-            {
-              name: "Madison Scott",
-              action: "Downloaded 'Q3-Report.pdf'",
-              time: "20m ago",
-              highlight: true,
-            },
-            {
-              name: "Alex Chen",
-              action: "Viewed 'Design-System.fig'",
-              time: "1h ago",
-              highlight: false,
-            },
-            {
-              name: "Jordan Lee",
-              action: "Modified 'Brand-Guidelines'",
-              time: "3h ago",
-              highlight: false,
-            },
-            {
-              name: "Sam Parker",
-              action: "Uploaded 'Invoice_2024.pdf'",
-              time: "5h ago",
-              highlight: false,
-            },
-          ].map((item, i) => (
-            <div
-              key={i}
-              className={`relative flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800 py-3 last:border-0 transition-colors duration-300 ${
-                item.highlight && isActive ? "bg-zinc-100 dark:bg-zinc-800" : ""
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className="h-8 w-8 border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 flex items-center justify-center text-xs font-medium text-zinc-500">
-                  {item.name
-                    .split(" ")
-                    .map(n => n[0])
-                    .join("")}
-                </div>
-                <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
-                  {item.name}
-                </span>
-              </div>
-              <span className="text-xs text-zinc-400">{item.time}</span>
-              {item.highlight && showTooltip && (
-                <div className="absolute left-0 top-full z-10 mt-2 border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-3 shadow-none animate-fade-in">
-                  <span className="text-xs text-zinc-500">{item.action}</span>
-                  <span className="ml-2 text-xs text-zinc-400">
-                    — {item.time}
-                  </span>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
+      <div
+        className="mt-8 border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 overflow-hidden"
+        style={{ height: ROW_HEIGHT * activityData.length }}
+      >
+        {visibleItems.map(item => (
+          <ActivityRow key={item.id} item={item} />
+        ))}
       </div>
     </div>
   );
@@ -151,25 +233,41 @@ function ActivityCard() {
 function DuplicateCard() {
   const [merged, setMerged] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRefs = useRef<NodeJS.Timeout[]>([]);
 
   useEffect(() => {
+    const clearAllTimers = () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      timeoutRefs.current.forEach(clearTimeout);
+      timeoutRefs.current = [];
+    };
+
+    const animate = () => {
+      const t1 = setTimeout(() => setMerged(true), 500);
+      const t2 = setTimeout(() => setMerged(false), 3000);
+      timeoutRefs.current.push(t1, t2);
+    };
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          const animate = () => {
-            setTimeout(() => setMerged(true), 500);
-            setTimeout(() => setMerged(false), 3000);
-          };
+          clearAllTimers();
           animate();
-          const interval = setInterval(animate, 4000);
-          return () => clearInterval(interval);
+          intervalRef.current = setInterval(animate, 4000);
+        } else {
+          clearAllTimers();
+          setMerged(false);
         }
       },
       { threshold: 0.5 }
     );
 
     if (cardRef.current) observer.observe(cardRef.current);
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      clearAllTimers();
+    };
   }, []);
 
   return (
@@ -215,46 +313,61 @@ function SearchCard() {
   const [searchText, setSearchText] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const typingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const loopIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
+    const clearAllTimers = () => {
+      if (typingIntervalRef.current) clearInterval(typingIntervalRef.current);
+      if (loopIntervalRef.current) clearInterval(loopIntervalRef.current);
+      if (dropdownTimeoutRef.current) clearTimeout(dropdownTimeoutRef.current);
+    };
+
+    const animate = () => {
+      let i = 0;
+      const text = "inv...";
+      setSearchText("");
+      setShowDropdown(false);
+
+      if (typingIntervalRef.current) clearInterval(typingIntervalRef.current);
+
+      typingIntervalRef.current = setInterval(() => {
+        if (i <= text.length) {
+          setSearchText(text.slice(0, i));
+          i++;
+        } else {
+          if (typingIntervalRef.current)
+            clearInterval(typingIntervalRef.current);
+          setShowDropdown(true);
+          dropdownTimeoutRef.current = setTimeout(() => {
+            setShowDropdown(false);
+            setSearchText("");
+          }, 2000);
+        }
+      }, 100);
+    };
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          const animate = () => {
-            let i = 0;
-            const text = "inv...";
-            setSearchText("");
-            setShowDropdown(false);
-
-            intervalRef.current = setInterval(() => {
-              if (i <= text.length) {
-                setSearchText(text.slice(0, i));
-                i++;
-              } else {
-                if (intervalRef.current) clearInterval(intervalRef.current);
-                setShowDropdown(true);
-                setTimeout(() => {
-                  setShowDropdown(false);
-                  setSearchText("");
-                }, 2000);
-              }
-            }, 100);
-          };
-
+          clearAllTimers();
           animate();
-          const loopInterval = setInterval(animate, 4000);
-          return () => {
-            clearInterval(loopInterval);
-            if (intervalRef.current) clearInterval(intervalRef.current);
-          };
+          loopIntervalRef.current = setInterval(animate, 4000);
+        } else {
+          clearAllTimers();
+          setSearchText("");
+          setShowDropdown(false);
         }
       },
       { threshold: 0.5 }
     );
 
     if (cardRef.current) observer.observe(cardRef.current);
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      clearAllTimers();
+    };
   }, []);
 
   return (
