@@ -29,24 +29,24 @@ export function getFileIcon(fileType: string): LucideIcon {
 
 export function getFileTypeColor(fileType: string): string {
   if (fileType.startsWith("image/")) {
-    return "bg-green-50 text-green-700";
+    return "bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300";
   }
   if (fileType.startsWith("video/")) {
-    return "bg-purple-50 text-purple-700";
+    return "bg-zinc-200 text-zinc-800 dark:bg-zinc-700 dark:text-zinc-200";
   }
   if (fileType.startsWith("audio/")) {
-    return "bg-blue-50 text-blue-700";
+    return "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400";
   }
   if (fileType.includes("pdf")) {
-    return "bg-red-50 text-red-700";
+    return "bg-zinc-200 text-zinc-700 dark:bg-zinc-700 dark:text-zinc-300";
   }
   if (fileType.includes("text")) {
-    return "bg-muted text-muted-foreground";
+    return "bg-zinc-50 text-zinc-600 dark:bg-zinc-900 dark:text-zinc-400";
   }
   if (fileType.includes("zip") || fileType.includes("rar")) {
-    return "bg-orange-50 text-orange-700";
+    return "bg-zinc-300 text-zinc-800 dark:bg-zinc-600 dark:text-zinc-200";
   }
-  return "bg-muted text-muted-foreground";
+  return "bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400";
 }
 
 export function getFileExtension(fileName: string): string {

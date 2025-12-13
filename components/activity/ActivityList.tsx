@@ -35,17 +35,17 @@ function getActivityIcon(action: ActivityAction) {
 function getActivityColor(action: ActivityAction) {
   switch (action) {
     case "upload":
-      return "bg-green-500/10 text-green-600 dark:text-green-400";
+      return "bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300";
     case "view":
-      return "bg-blue-500/10 text-blue-600 dark:text-blue-400";
+      return "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400";
     case "download":
-      return "bg-purple-500/10 text-purple-600 dark:text-purple-400";
+      return "bg-zinc-200 text-zinc-700 dark:bg-zinc-700 dark:text-zinc-300";
     case "rename":
-      return "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400";
+      return "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400";
     case "delete":
-      return "bg-red-500/10 text-red-600 dark:text-red-400";
+      return "bg-zinc-200 text-zinc-800 dark:bg-zinc-700 dark:text-zinc-200";
     case "restore":
-      return "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400";
+      return "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400";
   }
 }
 

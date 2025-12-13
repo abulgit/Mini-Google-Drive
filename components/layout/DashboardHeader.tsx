@@ -117,7 +117,7 @@ export function DashboardHeader({
                     setIsSearchOpen(true);
                   }
                 }}
-                className="pl-9 md:pl-10 pr-10 md:pr-12 py-1.5 md:py-2 w-full bg-muted border-0 rounded-full focus:bg-card focus:shadow-md focus:ring-2 focus:ring-ring transition-all text-sm"
+                className="pl-9 md:pl-10 pr-10 md:pr-12 py-1.5 md:py-2 w-full bg-muted border border-border rounded-full focus:bg-card focus:shadow-md focus:ring-2 focus:ring-ring transition-all text-sm"
               />
               {searchQuery && (
                 <button
@@ -222,7 +222,7 @@ export function DashboardHeader({
                   }
                 }}
                 autoFocus
-                className="pl-9 pr-9 py-2 w-full bg-muted border-0 rounded-full focus:bg-card focus:shadow-md focus:ring-2 focus:ring-ring transition-all text-sm"
+                className="pl-9 pr-9 py-2 w-full bg-muted border border-border rounded-full focus:bg-card focus:shadow-md focus:ring-2 focus:ring-ring transition-all text-sm"
               />
               {searchQuery && (
                 <button

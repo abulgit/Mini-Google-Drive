@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import ThemeToggleButton from "@/components/ui/theme-toggle-button";
 
 interface NavigationProps {
   onSignIn: () => void;
@@ -52,10 +53,11 @@ export function Navigation({ onSignIn, onGetStarted }: NavigationProps) {
           </Link>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
+          <ThemeToggleButton variant="circle" start="center" />
           <button
             onClick={onSignIn}
-            className="hidden text-sm text-zinc-900 dark:text-zinc-100 transition-colors hover:text-zinc-500 sm:block"
+            className="hidden border border-zinc-300 dark:border-zinc-600 px-4 py-2 text-sm font-medium text-zinc-900 dark:text-zinc-100 transition-all hover:border-zinc-900 dark:hover:border-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-900 sm:block"
           >
             Sign in
           </button>

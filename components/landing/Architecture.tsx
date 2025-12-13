@@ -28,11 +28,7 @@ export function Architecture() {
     <section
       ref={sectionRef}
       id="security"
-      className="relative border-b border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-900 py-20 lg:py-28"
-      style={{
-        backgroundImage: `radial-gradient(circle, #d4d4d8 1px, transparent 1px)`,
-        backgroundSize: "20px 20px",
-      }}
+      className="relative border-b border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-900 py-20 lg:py-28 architecture-dots"
     >
       <div className="mx-auto max-w-[1440px] px-6 lg:px-12">
         <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
@@ -103,57 +99,53 @@ export function Architecture() {
           </div>
 
           <div className="flex items-center justify-center">
-            <div className="relative h-64 w-64 lg:h-80 lg:w-80">
+            <div className="relative h-64 w-64 lg:h-80 lg:w-80 cursor-pointer group">
               <svg
                 viewBox="0 0 200 200"
-                className={`h-full w-full transition-transform duration-1000 ${isVisible ? "rotate-0" : "-rotate-12"}`}
-                style={{
-                  animation: isVisible
-                    ? "slowRotate 20s linear infinite"
-                    : "none",
-                }}
+                className={`h-full w-full transition-all duration-500 ${isVisible ? "opacity-100 scale-100" : "opacity-0 scale-90"} group-hover:scale-105`}
               >
+                {/* Lock body */}
                 <rect
                   x="50"
                   y="90"
                   width="100"
                   height="80"
                   fill="none"
-                  stroke="#52525B"
-                  strokeWidth="1.5"
-                  className={`transition-all duration-700 ${isVisible ? "opacity-100" : "opacity-0"}`}
+                  className={`stroke-zinc-400 dark:stroke-zinc-500 transition-all duration-700 ${isVisible ? "opacity-100" : "opacity-0"}`}
+                  strokeWidth="2"
                 />
+                {/* Lock shackle */}
                 <path
                   d="M70 90 L70 60 Q70 40 100 40 Q130 40 130 60 L130 90"
                   fill="none"
-                  stroke="#52525B"
-                  strokeWidth="1.5"
-                  className={`transition-all duration-700 delay-200 ${isVisible ? "opacity-100" : "opacity-0"}`}
+                  className={`stroke-zinc-400 dark:stroke-zinc-500 transition-all duration-700 delay-200 ${isVisible ? "opacity-100" : "opacity-0"}`}
+                  strokeWidth="2"
                 />
+                {/* Keyhole circle */}
                 <circle
                   cx="100"
                   cy="125"
-                  r="10"
+                  r="12"
                   fill="none"
-                  stroke="#52525B"
-                  strokeWidth="1.5"
-                  className={`transition-all duration-700 delay-400 ${isVisible ? "opacity-100" : "opacity-0"}`}
+                  className={`stroke-zinc-500 dark:stroke-zinc-400 transition-all duration-700 delay-400 ${isVisible ? "opacity-100" : "opacity-0"}`}
+                  strokeWidth="2"
                 />
+                {/* Keyhole line */}
                 <line
                   x1="100"
-                  y1="135"
+                  y1="137"
                   x2="100"
-                  y2="150"
-                  stroke="#52525B"
-                  strokeWidth="1.5"
-                  className={`transition-all duration-700 delay-400 ${isVisible ? "opacity-100" : "opacity-0"}`}
+                  y2="155"
+                  className={`stroke-zinc-500 dark:stroke-zinc-400 transition-all duration-700 delay-400 ${isVisible ? "opacity-100" : "opacity-0"}`}
+                  strokeWidth="2"
                 />
+                {/* Grid lines - horizontal */}
                 <line
                   x1="50"
                   y1="110"
                   x2="150"
                   y2="110"
-                  stroke="#A1A1AA"
+                  className="stroke-zinc-300 dark:stroke-zinc-600"
                   strokeWidth="0.5"
                   strokeDasharray="4 4"
                 />
@@ -162,7 +154,7 @@ export function Architecture() {
                   y1="130"
                   x2="150"
                   y2="130"
-                  stroke="#A1A1AA"
+                  className="stroke-zinc-300 dark:stroke-zinc-600"
                   strokeWidth="0.5"
                   strokeDasharray="4 4"
                 />
@@ -171,16 +163,17 @@ export function Architecture() {
                   y1="150"
                   x2="150"
                   y2="150"
-                  stroke="#A1A1AA"
+                  className="stroke-zinc-300 dark:stroke-zinc-600"
                   strokeWidth="0.5"
                   strokeDasharray="4 4"
                 />
+                {/* Grid lines - vertical */}
                 <line
                   x1="75"
                   y1="90"
                   x2="75"
                   y2="170"
-                  stroke="#A1A1AA"
+                  className="stroke-zinc-300 dark:stroke-zinc-600"
                   strokeWidth="0.5"
                   strokeDasharray="4 4"
                 />
@@ -189,7 +182,7 @@ export function Architecture() {
                   y1="90"
                   x2="100"
                   y2="170"
-                  stroke="#A1A1AA"
+                  className="stroke-zinc-300 dark:stroke-zinc-600"
                   strokeWidth="0.5"
                   strokeDasharray="4 4"
                 />
@@ -198,7 +191,7 @@ export function Architecture() {
                   y1="90"
                   x2="125"
                   y2="170"
-                  stroke="#A1A1AA"
+                  className="stroke-zinc-300 dark:stroke-zinc-600"
                   strokeWidth="0.5"
                   strokeDasharray="4 4"
                 />

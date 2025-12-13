@@ -191,7 +191,8 @@ export function Sidebar({ className, onNewClick }: SidebarProps) {
 
                 <Button
                   size="sm"
-                  className="w-full text-xs h-8 rounded-lg border border-primary text-foreground hover:bg-primary/10"
+                  variant="outline"
+                  className="w-full text-xs h-8"
                   onClick={() => setBuyStorageModalOpen(true)}
                 >
                   Buy storage

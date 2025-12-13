@@ -43,11 +43,11 @@ export function Hero({ onGetStarted }: HeroProps) {
           </span>
         </div>
 
-        <h1 className="mx-auto max-w-4xl text-center text-5xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100 animate-fade-up animation-delay-100 md:text-6xl lg:text-7xl">
+        <h1 className="mx-auto max-w-4xl text-center text-3xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100 animate-fade-up animation-delay-100 sm:text-5xl md:text-6xl lg:text-7xl">
           File management, perfected<span className="font-bold">.</span>
         </h1>
 
-        <p className="mx-auto mt-6 max-w-xl text-center text-lg text-zinc-500 animate-fade-up animation-delay-200 lg:text-xl">
+        <p className="mx-auto mt-6 max-w-xl text-center text-base text-zinc-500 animate-fade-up animation-delay-200 sm:text-lg lg:text-xl">
           Minidrive is the high-performance workspace for your life&apos;s data.
           5GB free. Zero-knowledge encryption. Native speed.
         </p>
@@ -61,7 +61,7 @@ export function Hero({ onGetStarted }: HeroProps) {
           </button>
           <a
             href="#security"
-            className="group flex items-center gap-2 text-sm font-medium text-zinc-900 dark:text-zinc-100 transition-colors hover:text-zinc-500"
+            className="group flex items-center gap-2 border border-zinc-300 dark:border-zinc-600 px-6 py-3 text-sm font-medium text-zinc-900 dark:text-zinc-100 transition-all hover:border-zinc-900 dark:hover:border-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-900"
           >
             View the architecture
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
