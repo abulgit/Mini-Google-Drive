@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { ViewFileModal } from "@/components/modals/ViewFileModal";
 import { FileEmptyState } from "@/components/files/FileEmptyState";
 import { FileListView } from "@/components/files/FileListView";
 import { FileGridView } from "@/components/files/FileGridView";
@@ -16,6 +15,7 @@ interface FileDisplayProps {
   mode: "files" | "trash";
   onFileDeleted: () => void;
   onFileUpdated?: () => void;
+  onViewFile: (file: FileDocument) => void;
 }
 
 export function FileDisplay({
@@ -23,10 +23,9 @@ export function FileDisplay({
   mode,
   onFileDeleted,
   onFileUpdated,
+  onViewFile,
 }: FileDisplayProps) {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [viewFile, setViewFile] = useState<FileDocument | null>(null);
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
   const {
     deletingFiles,
@@ -53,8 +52,7 @@ export function FileDisplay({
   const handleView = (fileId: string) => {
     const file = files.find(f => f._id!.toString() === fileId);
     if (file) {
-      setViewFile(file);
-      setIsViewModalOpen(true);
+      onViewFile(file);
     }
   };
 
@@ -125,15 +123,6 @@ export function FileDisplay({
         isRenaming={renamingFiles.has(fileToRename?._id?.toString() || "")}
         onClose={() => setRenameDialogOpen(false)}
         onConfirm={confirmRename}
-      />
-
-      <ViewFileModal
-        file={viewFile}
-        isOpen={isViewModalOpen}
-        onClose={() => {
-          setIsViewModalOpen(false);
-          setViewFile(null);
-        }}
       />
     </>
   );

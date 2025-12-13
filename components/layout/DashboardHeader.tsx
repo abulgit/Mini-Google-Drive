@@ -13,18 +13,34 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { Search, SlidersHorizontal, Menu } from "lucide-react";
+import { Search, Menu, X } from "lucide-react";
 import ThemeToggleButton from "@/components/ui/theme-toggle-button";
 import Image from "next/image";
+import { useSearch } from "@/hooks/search/useSearch";
+import { SearchDropdown } from "@/components/search/SearchDropdown";
+import type { FileDocument } from "@/types";
 
 interface DashboardHeaderProps {
   onUploadClick?: () => void;
   onMenuClick?: () => void;
+  onFileSelect?: (file: FileDocument) => void;
 }
 
-export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
+export function DashboardHeader({
+  onMenuClick,
+  onFileSelect,
+}: DashboardHeaderProps) {
   const { data: session } = useSession();
-  const [searchQuery, setSearchQuery] = useState("");
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+  const {
+    searchQuery,
+    setSearchQuery,
+    searchResults,
+    isSearching,
+    isSearchOpen,
+    setIsSearchOpen,
+    clearSearch,
+  } = useSearch();
 
   const handleSignOut = () => {
     signOut({ callbackUrl: "/" });
@@ -42,11 +58,28 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
       .substring(0, 2);
   };
 
+  const handleFileSelect = (file: FileDocument) => {
+    onFileSelect?.(file);
+    clearSearch();
+    setIsMobileSearchOpen(false);
+  };
+
+  const handleSearchClose = () => {
+    setIsSearchOpen(false);
+  };
+
+  const handleMobileSearchToggle = () => {
+    if (isMobileSearchOpen) {
+      clearSearch();
+    }
+    setIsMobileSearchOpen(!isMobileSearchOpen);
+  };
+
   return (
     <TooltipProvider>
       <header className="border-b border-border bg-card sticky top-0 z-40">
         <div className="flex items-center justify-between px-3 sm:px-4 md:px-6 py-2 md:py-3">
-          <div className="flex items-center gap-2 sm:gap-4 md:gap-6 flex-1">
+          <div className="flex items-center gap-2 sm:gap-4 md:gap-6">
             <Button
               variant="ghost"
               size="sm"
@@ -68,31 +101,56 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
                 Mini Drive
               </h1>
             </div>
+          </div>
 
-            <div className="hidden sm:flex flex-1 max-w-2xl">
-              <div className="relative w-full">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder="Search in Drive"
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  className="pl-9 md:pl-10 pr-10 md:pr-12 py-1.5 md:py-2 w-full bg-muted border-0 rounded-full focus:bg-card focus:shadow-md focus:ring-2 focus:ring-ring transition-all text-sm"
-                />
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-1 md:right-2 top-1/2 transform -translate-y-1/2 w-7 h-7 md:w-8 md:h-8 p-0 rounded-full"
+          {/* Center - Search Bar (Desktop) */}
+          <div className="hidden sm:flex flex-1 max-w-2xl justify-center">
+            <div className="relative w-full max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search in Drive"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                onFocus={() => {
+                  if (searchQuery.trim().length >= 2) {
+                    setIsSearchOpen(true);
+                  }
+                }}
+                className="pl-9 md:pl-10 pr-10 md:pr-12 py-1.5 md:py-2 w-full bg-muted border-0 rounded-full focus:bg-card focus:shadow-md focus:ring-2 focus:ring-ring transition-all text-sm"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={clearSearch}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  <SlidersHorizontal className="w-3.5 h-3.5 md:w-4 md:h-4 text-muted-foreground" />
-                </Button>
-              </div>
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+              <SearchDropdown
+                isOpen={isSearchOpen}
+                isSearching={isSearching}
+                searchResults={searchResults}
+                searchQuery={searchQuery}
+                onClose={handleSearchClose}
+                onFileSelect={handleFileSelect}
+              />
             </div>
           </div>
 
           <div className="flex items-center gap-1 sm:gap-2">
-            <Button variant="ghost" size="sm" className="sm:hidden w-9 h-9 p-0">
-              <Search className="w-5 h-5" />
+            <Button
+              variant="ghost"
+              size="sm"
+              className="sm:hidden w-9 h-9 p-0"
+              onClick={handleMobileSearchToggle}
+            >
+              {isMobileSearchOpen ? (
+                <X className="w-5 h-5" />
+              ) : (
+                <Search className="w-5 h-5" />
+              )}
             </Button>
 
             <ThemeToggleButton variant="circle" start="center" />
@@ -147,6 +205,45 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
             </DropdownMenu>
           </div>
         </div>
+
+        {/* Mobile Search Bar */}
+        {isMobileSearchOpen && (
+          <div className="sm:hidden px-3 pb-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search in Drive"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                onFocus={() => {
+                  if (searchQuery.trim().length >= 2) {
+                    setIsSearchOpen(true);
+                  }
+                }}
+                autoFocus
+                className="pl-9 pr-9 py-2 w-full bg-muted border-0 rounded-full focus:bg-card focus:shadow-md focus:ring-2 focus:ring-ring transition-all text-sm"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={clearSearch}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+              <SearchDropdown
+                isOpen={isSearchOpen}
+                isSearching={isSearching}
+                searchResults={searchResults}
+                searchQuery={searchQuery}
+                onClose={handleSearchClose}
+                onFileSelect={handleFileSelect}
+              />
+            </div>
+          </div>
+        )}
       </header>
     </TooltipProvider>
   );

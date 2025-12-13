@@ -5,6 +5,7 @@ import { DashboardHeader } from "@/components/layout/DashboardHeader";
 import { Sidebar } from "@/components/layout/SidebarComponent";
 import { FileDisplay } from "@/components/files/FileDisplay";
 import { UploadModal } from "@/components/modals/UploadModal";
+import { ViewFileModal } from "@/components/modals/ViewFileModal";
 import { PaginationControls } from "@/components/common/PaginationControls";
 import type { FileDocument } from "@/types";
 
@@ -47,10 +48,25 @@ export function DashboardLayout({
   onGoToPage,
 }: DashboardLayoutProps) {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [viewFile, setViewFile] = useState<FileDocument | null>(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+
+  const handleViewFile = (file: FileDocument) => {
+    setViewFile(file);
+    setIsViewModalOpen(true);
+  };
+
+  const handleCloseViewModal = () => {
+    setIsViewModalOpen(false);
+    setViewFile(null);
+  };
 
   return (
     <div className="min-h-screen bg-background">
-      <DashboardHeader onMenuClick={() => setIsMobileSidebarOpen(true)} />
+      <DashboardHeader
+        onMenuClick={() => setIsMobileSidebarOpen(true)}
+        onFileSelect={handleViewFile}
+      />
 
       <div className="flex h-[calc(100vh-57px)] md:h-[calc(100vh-73px)]">
         {/* Desktop Sidebar */}
@@ -93,6 +109,7 @@ export function DashboardLayout({
                     files={files}
                     onFileDeleted={onFileAction}
                     onFileUpdated={onFileAction}
+                    onViewFile={handleViewFile}
                   />
                   {pagination && onNextPage && onPreviousPage && onGoToPage && (
                     <PaginationControls
@@ -116,6 +133,12 @@ export function DashboardLayout({
         isOpen={isUploadModalOpen}
         onClose={onUploadModalClose}
         onUploadSuccess={onUploadSuccess}
+      />
+
+      <ViewFileModal
+        file={viewFile}
+        isOpen={isViewModalOpen}
+        onClose={handleCloseViewModal}
       />
     </div>
   );
