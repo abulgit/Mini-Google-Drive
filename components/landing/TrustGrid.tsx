@@ -3,12 +3,12 @@
 import { useState } from "react";
 
 const trustItems = [
-  { name: "SOC2", label: "Compliant" },
-  { name: "AES-256", label: "Encryption" },
-  { name: "AZURE", label: "Infrastructure" },
-  { name: "Stripe", label: "Payments" },
+  { name: "5 GB", label: "Free Storage" },
+  { name: "SAS", label: "Secure URLs" },
+  { name: "AZURE", label: "Cloud Storage" },
+  { name: "30 Days", label: "Trash Recovery" },
   { name: "99.99%", label: "Uptime" },
-  { name: "GDPR", label: "Compliant" },
+  { name: "OAuth", label: "Secure Login" },
 ];
 
 export function TrustGrid() {

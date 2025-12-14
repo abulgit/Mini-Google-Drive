@@ -35,24 +35,24 @@ export function Architecture() {
             {/* Feature List */}
             <div className="space-y-0 border-t border-zinc-200 dark:border-zinc-700">
               <div className="flex items-center gap-4 py-4 border-b border-zinc-200 dark:border-zinc-700">
-                <Key size={16} className="text-zinc-900 dark:text-zinc-100" />
-                <span className="text-zinc-900 dark:text-zinc-100">
-                  AES-256 Encryption
-                </span>
-              </div>
-              <div className="flex items-center gap-4 py-4 border-b border-zinc-200 dark:border-zinc-700">
                 <Shield
                   size={16}
                   className="text-zinc-900 dark:text-zinc-100"
                 />
                 <span className="text-zinc-900 dark:text-zinc-100">
-                  2-Factor Authentication
+                  Google OAuth Authentication
+                </span>
+              </div>
+              <div className="flex items-center gap-4 py-4 border-b border-zinc-200 dark:border-zinc-700">
+                <Key size={16} className="text-zinc-900 dark:text-zinc-100" />
+                <span className="text-zinc-900 dark:text-zinc-100">
+                  CSRF Token Protection
                 </span>
               </div>
               <div className="flex items-center gap-4 py-4 border-b border-zinc-200 dark:border-zinc-700">
                 <Zap size={16} className="text-zinc-900 dark:text-zinc-100" />
                 <span className="text-zinc-900 dark:text-zinc-100">
-                  &lt; 50ms Latency
+                  Time-Limited SAS URLs
                 </span>
               </div>
             </div>

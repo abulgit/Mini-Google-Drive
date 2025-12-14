@@ -294,7 +294,7 @@ export function Hero({ onGetStarted }: HeroProps) {
           </div>
 
           {/* Duplicate Detected Box */}
-          <div className="shard absolute bottom-8 left-12 hidden border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-3 will-change-transform lg:block">
+          <div className="shard absolute bottom-20 left-12 hidden border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-3 will-change-transform lg:block">
             <AnimatePresence mode="wait">
               {duplicateStatus === "pending" ? (
                 <motion.div
