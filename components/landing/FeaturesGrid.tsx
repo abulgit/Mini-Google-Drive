@@ -8,6 +8,7 @@ import {
   Eye,
   File,
   FileEdit,
+  MousePointer2,
   RotateCcw,
   Search,
   Share2,
@@ -469,7 +470,9 @@ function TrashCard() {
             className="mt-6 sm:mt-8 w-full p-2 border border-zinc-200 dark:border-zinc-700 flex items-center space-x-2 sm:space-x-3 bg-white dark:bg-zinc-900 z-10 relative"
           >
             <File className="w-3 h-3 sm:w-4 sm:h-4 text-zinc-600 dark:text-zinc-400 shrink-0" />
-            <div className="w-12 sm:w-20 h-2 bg-zinc-100 dark:bg-zinc-800" />
+            <span className="text-[10px] sm:text-xs text-zinc-600 dark:text-zinc-400 truncate">
+              Invoice_2024.pdf
+            </span>
           </motion.div>
         </div>
 
@@ -486,10 +489,12 @@ function TrashCard() {
               repeat: Infinity,
               repeatDelay: 1,
             }}
-            className="mt-6 sm:mt-8 w-full p-2 border border-zinc-200 dark:border-zinc-700 flex items-center space-x-2 sm:space-x-3 bg-white dark:bg-zinc-900 opacity-50 grayscale"
+            className="mt-6 sm:mt-8 w-full p-2 border border-zinc-200 dark:border-zinc-700 flex items-center space-x-2 sm:space-x-3 bg-white dark:bg-zinc-900 opacity-50 grayscale blur-[1px]"
           >
             <Trash2 className="w-3 h-3 sm:w-4 sm:h-4 text-zinc-600 dark:text-zinc-400 shrink-0" />
-            <div className="w-12 sm:w-20 h-2 bg-zinc-100 dark:bg-zinc-800" />
+            <span className="text-[10px] sm:text-xs text-zinc-600 dark:text-zinc-400 truncate">
+              Invoice_2024.pdf
+            </span>
           </motion.div>
         </div>
 
@@ -508,6 +513,56 @@ function TrashCard() {
           <button className="flex items-center font-bold hover:text-zinc-300 dark:hover:text-zinc-600">
             <RotateCcw className="w-3 h-3 mr-1" /> Undo
           </button>
+        </motion.div>
+
+        {/* Animated Mouse Pointer */}
+        <motion.div
+          initial={{ left: "18%", top: "45%" }}
+          animate={{
+            left: [
+              "18%", // 0: start at file
+              "18%", // 0.15: still at file (waiting)
+              "18%", // 0.2: grab file
+              "65%", // 0.4: drag to trash
+              "65%", // 0.5: release, toast appears
+              "55%", // 0.6: move to undo button
+              "55%", // 0.7: at undo button
+              "55%", // 0.8: click undo
+              "18%", // 1: return to start
+            ],
+            top: [
+              "45%", // 0: start at file
+              "45%", // 0.15: still at file
+              "45%", // 0.2: grab file
+              "45%", // 0.4: drag to trash (same height)
+              "45%", // 0.5: release
+              "75%", // 0.6: move down to undo
+              "75%", // 0.7: at undo button
+              "75%", // 0.8: click undo
+              "45%", // 1: return to start
+            ],
+            scale: [
+              1, // 0: normal
+              1, // 0.15: normal
+              0.8, // 0.2: grab (press down)
+              0.8, // 0.4: dragging
+              1, // 0.5: release
+              1, // 0.6: moving
+              1, // 0.7: at button
+              0.8, // 0.8: click
+              1, // 1: normal
+            ],
+          }}
+          transition={{
+            duration: 4,
+            times: [0, 0.15, 0.2, 0.4, 0.5, 0.6, 0.7, 0.8, 1],
+            repeat: Infinity,
+            repeatDelay: 1,
+            ease: "easeInOut",
+          }}
+          className="absolute z-20 pointer-events-none"
+        >
+          <MousePointer2 className="w-5 h-5 text-zinc-800 dark:text-zinc-200 fill-white dark:fill-zinc-900 drop-shadow-md" />
         </motion.div>
       </div>
     </div>

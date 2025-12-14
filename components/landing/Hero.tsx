@@ -13,7 +13,8 @@ interface HeroProps {
 export function Hero({ onGetStarted }: HeroProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const shardsRef = useRef<HTMLDivElement>(null);
-  const [duplicateStatus, setDuplicateStatus] = useState<DuplicateStatus>("pending");
+  const [duplicateStatus, setDuplicateStatus] =
+    useState<DuplicateStatus>("pending");
 
   // Auto-reset duplicate status after showing success
   useEffect(() => {
@@ -36,7 +37,7 @@ export function Hero({ onGetStarted }: HeroProps) {
 
       animationFrameId = requestAnimationFrame(() => {
         if (!shardsRef.current || !containerRef.current) return;
-        
+
         const rect = containerRef.current.getBoundingClientRect();
         const x = (e.clientX - rect.left - rect.width / 2) / 50;
         const y = (e.clientY - rect.top - rect.height / 2) / 50;
@@ -52,7 +53,7 @@ export function Hero({ onGetStarted }: HeroProps) {
 
     const container = containerRef.current;
     container?.addEventListener("mousemove", handleMouseMove);
-    
+
     return () => {
       container?.removeEventListener("mousemove", handleMouseMove);
       if (animationFrameId) {
@@ -168,12 +169,16 @@ export function Hero({ onGetStarted }: HeroProps) {
               <motion.div
                 className="h-2 w-2 bg-emerald-500 rounded-full"
                 animate={{ opacity: [1, 0.4, 1] }}
-                transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
+                transition={{
+                  duration: 1.2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
               />
               <span className="text-xs text-zinc-500">
                 Uploading
                 <span className="inline-flex w-4">
-                  {[0, 1, 2].map((i) => (
+                  {[0, 1, 2].map(i => (
                     <motion.span
                       key={i}
                       initial={{ opacity: 0 }}
@@ -196,7 +201,11 @@ export function Hero({ onGetStarted }: HeroProps) {
                 className="h-full bg-zinc-900 dark:bg-zinc-100"
                 initial={{ width: "0%" }}
                 animate={{ width: "100%" }}
-                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
               />
             </div>
           </div>
@@ -206,7 +215,12 @@ export function Hero({ onGetStarted }: HeroProps) {
             <div className="flex items-center gap-2">
               <motion.div
                 animate={{ rotateY: [0, 360] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", repeatDelay: 1 }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  repeatDelay: 1,
+                }}
               >
                 <Lock className="h-4 w-4 text-zinc-600 dark:text-zinc-400" />
               </motion.div>
@@ -231,7 +245,11 @@ export function Hero({ onGetStarted }: HeroProps) {
                   <div className="flex items-center gap-1.5">
                     <motion.div
                       animate={{ scale: [1, 1.2, 1] }}
-                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                      }}
                     >
                       <AlertTriangle className="h-3 w-3 text-amber-500" />
                     </motion.div>
@@ -242,7 +260,10 @@ export function Hero({ onGetStarted }: HeroProps) {
                   <div className="mt-2 flex gap-2">
                     <motion.button
                       className="border border-zinc-200 dark:border-zinc-700 px-2 py-1 text-xs text-zinc-500"
-                      whileHover={{ scale: 1.05, backgroundColor: "rgba(0,0,0,0.02)" }}
+                      whileHover={{
+                        scale: 1.05,
+                        backgroundColor: "rgba(0,0,0,0.02)",
+                      }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setDuplicateStatus("ignored")}
                     >
@@ -269,7 +290,9 @@ export function Hero({ onGetStarted }: HeroProps) {
                 >
                   <Check className="h-3 w-3 text-emerald-500" />
                   <span className="text-xs font-medium uppercase tracking-widest text-emerald-600 dark:text-emerald-400">
-                    {duplicateStatus === "ignored" ? "Ignored Successfully" : "Merged Successfully"}
+                    {duplicateStatus === "ignored"
+                      ? "Ignored Successfully"
+                      : "Merged Successfully"}
                   </span>
                 </motion.div>
               )}
