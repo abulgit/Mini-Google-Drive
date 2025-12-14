@@ -13,11 +13,15 @@ import {
   Pricing,
   Footer,
 } from "@/components/landing";
+import { useScrollRestore } from "@/hooks/useScrollRestore";
 
 export default function Home() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [isSigninModalOpen, setIsSigninModalOpen] = useState(false);
+
+  // Restore scroll position on page refresh (only after loading completes)
+  useScrollRestore(status !== "loading" && !session);
 
   useEffect(() => {
     if (status === "loading") return;

@@ -33,24 +33,36 @@ export function Navigation({ onSignIn, onGetStarted }: NavigationProps) {
         </Link>
 
         <div className="hidden items-center gap-8 md:flex">
-          <Link
-            href="#features"
+          <button
+            onClick={() =>
+              document
+                .getElementById("features")
+                ?.scrollIntoView({ behavior: "smooth" })
+            }
             className="text-sm text-zinc-900 dark:text-zinc-100 transition-colors hover:text-zinc-500"
           >
             Features
-          </Link>
-          <Link
-            href="#security"
+          </button>
+          <button
+            onClick={() =>
+              document
+                .getElementById("security")
+                ?.scrollIntoView({ behavior: "smooth" })
+            }
             className="text-sm text-zinc-900 dark:text-zinc-100 transition-colors hover:text-zinc-500"
           >
             Security
-          </Link>
-          <Link
-            href="#pricing"
+          </button>
+          <button
+            onClick={() =>
+              document
+                .getElementById("pricing")
+                ?.scrollIntoView({ behavior: "smooth" })
+            }
             className="text-sm text-zinc-900 dark:text-zinc-100 transition-colors hover:text-zinc-500"
           >
             Pricing
-          </Link>
+          </button>
         </div>
 
         <div className="flex items-center gap-2 sm:gap-4">
