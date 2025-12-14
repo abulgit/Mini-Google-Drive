@@ -232,50 +232,8 @@ function ActivityCard() {
 }
 
 function DuplicateCard() {
-  const [merged, setMerged] = useState(false);
-  const cardRef = useRef<HTMLDivElement>(null);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const timeoutRefs = useRef<NodeJS.Timeout[]>([]);
-
-  useEffect(() => {
-    const clearAllTimers = () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      timeoutRefs.current.forEach(clearTimeout);
-      timeoutRefs.current = [];
-    };
-
-    const animate = () => {
-      const t1 = setTimeout(() => setMerged(true), 500);
-      const t2 = setTimeout(() => setMerged(false), 3000);
-      timeoutRefs.current.push(t1, t2);
-    };
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          clearAllTimers();
-          animate();
-          intervalRef.current = setInterval(animate, 4000);
-        } else {
-          clearAllTimers();
-          setMerged(false);
-        }
-      },
-      { threshold: 0.5 }
-    );
-
-    if (cardRef.current) observer.observe(cardRef.current);
-    return () => {
-      observer.disconnect();
-      clearAllTimers();
-    };
-  }, []);
-
   return (
-    <div
-      ref={cardRef}
-      className="relative bg-white dark:bg-zinc-950 p-8 lg:p-10"
-    >
+    <div className="relative bg-white dark:bg-zinc-950 p-8 lg:p-10">
       <div className="flex items-start gap-3">
         <Copy className="h-5 w-5 text-zinc-400" />
         <span className="text-xs font-medium uppercase tracking-widest text-zinc-400">
@@ -289,22 +247,99 @@ function DuplicateCard() {
         Automatic hash-matching identifies and merges duplicate files.
       </p>
 
-      <div className="mt-8 flex items-center justify-center gap-4 h-24">
+      <div className="mt-8 relative w-full h-48 flex items-center justify-center bg-zinc-50/50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-700 overflow-hidden">
         <div
-          className={`relative h-16 w-14 border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 transition-all duration-500 ${
-            merged ? "translate-x-6 opacity-0" : ""
-          }`}
+          className="absolute inset-0 opacity-10 dark:opacity-5"
+          style={{
+            backgroundImage: "radial-gradient(#71717a 1px, transparent 1px)",
+            backgroundSize: "12px 12px",
+          }}
+        />
+
+        {/* Primary File (The one that stays) */}
+        <motion.div
+          animate={{
+            scale: [1, 1, 1.05, 1],
+          }}
+          transition={{
+            duration: 5,
+            repeat: Infinity,
+            times: [0, 0.45, 0.5, 1],
+          }}
+          className="absolute z-20 w-14 h-16 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex flex-col items-center justify-center shadow-sm"
         >
-          <div className="absolute -right-1 -top-1 h-3 w-3 border-l border-b border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-950" />
-        </div>
-        <div className="relative h-16 w-14 border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900">
-          <div className="absolute -right-1 -top-1 h-3 w-3 border-l border-b border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-950" />
-          {merged && (
-            <div className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center bg-zinc-900 dark:bg-zinc-100 text-xs text-white dark:text-zinc-900 animate-fade-in">
-              1
-            </div>
-          )}
-        </div>
+          <File className="w-5 h-5 text-zinc-900 dark:text-zinc-100" />
+          <div className="mt-2 w-6 h-0.5 bg-zinc-100 dark:bg-zinc-700" />
+          <div className="mt-1 w-4 h-0.5 bg-zinc-100 dark:bg-zinc-700" />
+        </motion.div>
+
+        {/* Duplicate File (The one that merges) */}
+        <motion.div
+          animate={{
+            x: [40, 40, 0, 40],
+            opacity: [1, 1, 0, 0],
+            scale: [1, 1, 0.9, 0],
+            rotate: [0, 0, -2, 0],
+          }}
+          transition={{
+            duration: 5,
+            repeat: Infinity,
+            times: [0, 0.3, 0.5, 1],
+            ease: "easeInOut",
+          }}
+          className="absolute z-10 w-14 h-16 bg-white dark:bg-zinc-900 border border-dashed border-zinc-300 dark:border-zinc-600 flex flex-col items-center justify-center"
+        >
+          <File className="w-5 h-5 text-zinc-400" />
+          <div className="mt-2 w-6 h-0.5 bg-zinc-50 dark:bg-zinc-800" />
+          <div className="mt-1 w-4 h-0.5 bg-zinc-50 dark:bg-zinc-800" />
+        </motion.div>
+
+        {/* Scanner Line */}
+        <motion.div
+          animate={{
+            top: ["-10%", "120%"],
+            opacity: [1, 1, 0],
+          }}
+          transition={{
+            duration: 1.5,
+            repeat: Infinity,
+            repeatDelay: 3.5,
+            ease: "linear",
+          }}
+          className="absolute w-full h-[1px] bg-red-500/50 z-30 shadow-[0_0_8px_rgba(239,68,68,0.4)]"
+        />
+
+        {/* Match Text */}
+        <motion.div
+          animate={{ opacity: [0, 1, 0] }}
+          transition={{
+            duration: 0.6,
+            repeat: Infinity,
+            repeatDelay: 4.4,
+            times: [0, 0.5, 1],
+          }}
+          className="absolute top-1/2 -translate-y-1/2 bg-red-500 text-white text-[9px] font-mono px-1.5 py-0.5 z-35"
+        >
+          HASH MATCH
+        </motion.div>
+
+        {/* Saved Text */}
+        <motion.div
+          animate={{
+            opacity: [0, 0, 1, 1, 0],
+            y: [0, 0, -20, -20, 0],
+          }}
+          transition={{
+            duration: 5,
+            repeat: Infinity,
+            times: [0, 0.5, 0.6, 0.8, 1],
+          }}
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40"
+        >
+          <div className="bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 text-[10px] font-mono px-2 py-1 whitespace-nowrap shadow-sm">
+            DEDUPLICATED
+          </div>
+        </motion.div>
       </div>
     </div>
   );

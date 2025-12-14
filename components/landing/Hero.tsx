@@ -2,7 +2,15 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Lock, Check, AlertTriangle } from "lucide-react";
+import {
+  ArrowRight,
+  Lock,
+  Check,
+  AlertTriangle,
+  FileText,
+  Folder,
+  MoreHorizontal,
+} from "lucide-react";
 
 type DuplicateStatus = "pending" | "ignored" | "merged";
 
@@ -101,64 +109,118 @@ export function Hero({ onGetStarted }: HeroProps) {
 
         <div className="relative mt-16 lg:mt-24" ref={shardsRef}>
           <div className="relative mx-auto max-w-4xl animate-draw-border">
-            <div className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-4 shadow-none lg:p-6">
-              <div className="mb-4 flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800 pb-4">
-                <div className="flex items-center gap-3">
-                  <div className="h-3 w-3 border border-zinc-300 dark:border-zinc-700" />
-                  <span className="text-xs font-medium uppercase tracking-widest text-zinc-400">
+            <div className="border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-950 shadow-sm overflow-hidden select-none">
+              {/* Mock Window Header */}
+              <div className="h-10 border-b border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 flex items-center px-4 justify-between">
+                <div className="flex space-x-2">
+                  <div className="w-2.5 h-2.5 rounded-full bg-zinc-300 dark:bg-zinc-600"></div>
+                  <div className="w-2.5 h-2.5 rounded-full bg-zinc-300 dark:bg-zinc-600"></div>
+                  <div className="w-2.5 h-2.5 rounded-full bg-zinc-300 dark:bg-zinc-600"></div>
+                </div>
+                <div className="text-[10px] text-zinc-400 uppercase tracking-widest">
+                  MiniDrive Safe
+                </div>
+                <div className="w-5"></div>
+              </div>
+
+              {/* Mock Window Body */}
+              <div className="p-6 bg-white dark:bg-zinc-950 relative">
+                <div className="flex justify-between items-center mb-8">
+                  <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
                     All Files
                   </span>
                 </div>
-                <div className="flex gap-2">
-                  <div className="h-6 w-16 border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900" />
-                  <div className="h-6 w-6 border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900" />
-                </div>
-              </div>
 
-              <div className="space-y-0 animate-content-fade">
-                {[
-                  {
-                    name: "Q3-Report.pdf",
-                    size: "2.4 MB",
-                    modified: "2 hours ago",
-                  },
-                  {
-                    name: "Design-System.fig",
-                    size: "18.2 MB",
-                    modified: "Yesterday",
-                  },
-                  {
-                    name: "Invoice_2024.pdf",
-                    size: "340 KB",
-                    modified: "3 days ago",
-                  },
-                  {
-                    name: "Brand-Guidelines.pdf",
-                    size: "5.1 MB",
-                    modified: "Last week",
-                  },
-                ].map((file, i) => (
-                  <div
-                    key={file.name}
-                    className="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800 py-3 last:border-0"
-                    style={{ animationDelay: `${400 + i * 100}ms` }}
+                <div className="space-y-1 animate-content-fade">
+                  {[
+                    {
+                      name: "Project_Alpha_Specs.pdf",
+                      size: "2.4 MB",
+                      type: "pdf",
+                    },
+                    {
+                      name: "Financials_Q3.xlsx",
+                      size: "1.1 MB",
+                      type: "sheet",
+                    },
+                    {
+                      name: "Design_System_v2.fig",
+                      size: "14.2 MB",
+                      type: "fig",
+                    },
+                    {
+                      name: "Architecture_Review.docx",
+                      size: "890 KB",
+                      type: "doc",
+                    },
+                  ].map((file, i) => (
+                    <div
+                      key={file.name}
+                      className="group flex items-center justify-between py-3 px-2 border-b border-dashed border-zinc-100 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors cursor-default"
+                      style={{ animationDelay: `${400 + i * 100}ms` }}
+                    >
+                      <div className="flex items-center space-x-3">
+                        {file.type === "pdf" ? (
+                          <FileText className="w-4 h-4 text-zinc-500" />
+                        ) : (
+                          <Folder className="w-4 h-4 text-zinc-500" />
+                        )}
+                        <span className="text-sm text-zinc-900 dark:text-zinc-100">
+                          {file.name}
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-8">
+                        <span className="text-xs text-zinc-500 font-tabular-nums">
+                          {file.size}
+                        </span>
+                        <MoreHorizontal className="w-4 h-4 text-zinc-300 dark:text-zinc-600 group-hover:text-zinc-900 dark:group-hover:text-zinc-100 transition-colors" />
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* Animated Upload Row */}
+                  <motion.div
+                    className="flex items-center justify-between py-3 px-2 bg-zinc-50/50 dark:bg-zinc-900/50"
+                    animate={{ opacity: [0.5, 1, 0.5] }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="h-8 w-8 border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900" />
-                      <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
-                        {file.name}
+                    <div className="flex items-center space-x-3">
+                      <motion.div
+                        className="w-4 h-4 border-2 border-zinc-200 dark:border-zinc-700 border-t-zinc-900 dark:border-t-zinc-100 rounded-full"
+                        animate={{ rotate: 360 }}
+                        transition={{
+                          duration: 1,
+                          repeat: Infinity,
+                          ease: "linear",
+                        }}
+                      />
+                      <span className="text-sm text-zinc-500 italic">
+                        Uploading Files
+                        <span className="inline-flex w-4">
+                          {[0, 1, 2].map(i => (
+                            <motion.span
+                              key={i}
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: [0, 1, 1, 0] }}
+                              transition={{
+                                duration: 1.5,
+                                repeat: Infinity,
+                                delay: i * 0.3,
+                                times: [0, 0.1, 0.7, 1],
+                              }}
+                            >
+                              .
+                            </motion.span>
+                          ))}
+                        </span>
                       </span>
                     </div>
-                    <div className="flex items-center gap-8">
-                      <span className="hidden text-xs text-zinc-400 sm:block">
-                        {file.size}
-                      </span>
-                      <span className="text-xs text-zinc-400">
-                        {file.modified}
-                      </span>
-                    </div>
-                  </div>
-                ))}
+                  </motion.div>
+                </div>
               </div>
             </div>
           </div>
